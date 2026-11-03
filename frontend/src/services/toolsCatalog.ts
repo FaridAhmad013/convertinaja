@@ -107,7 +107,7 @@ export const AVAILABLE_TOOLS: ToolDefinition[] = [
     name: 'JPG to PDF',
     category: 'image',
     description: 'Ubah satu atau banyak gambar JPG menjadi satu dokumen PDF.',
-    allowedFormats: ['jpg', 'jpeg'],
+    allowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
     minFiles: 1,
     maxFiles: 10,
     outputFormat: 'PDF',
@@ -117,7 +117,7 @@ export const AVAILABLE_TOOLS: ToolDefinition[] = [
     name: 'PNG to PDF',
     category: 'image',
     description: 'Ubah koleksi gambar PNG menjadi dokumen PDF berkualitas.',
-    allowedFormats: ['png'],
+    allowedFormats: ['png', 'jpg', 'jpeg', 'webp'],
     minFiles: 1,
     maxFiles: 10,
     outputFormat: 'PDF',
@@ -204,6 +204,16 @@ export const AVAILABLE_TOOLS: ToolDefinition[] = [
     maxFiles: 5,
     outputFormat: 'PDF',
   },
+  {
+    id: 'txt-to-pdf',
+    name: 'TXT to PDF',
+    category: 'office',
+    description: 'Ubah file teks biasa TXT menjadi dokumen PDF rapi.',
+    allowedFormats: ['txt'],
+    minFiles: 1,
+    maxFiles: 5,
+    outputFormat: 'PDF',
+  },
 ]
 
 export function detectFileFormat(file: File): FileFormat {
@@ -219,6 +229,7 @@ export function detectFileFormat(file: File): FileFormat {
   if (ext === 'xlsx' || mime.includes('spreadsheetml.sheet')) return 'xlsx'
   if (ext === 'pptx' || mime.includes('presentationml.presentation')) return 'pptx'
   if (ext === 'odt' || mime.includes('opendocument.text')) return 'odt'
+  if (ext === 'txt' || mime === 'text/plain') return 'txt'
 
   return 'unknown'
 }

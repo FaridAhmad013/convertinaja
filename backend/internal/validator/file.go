@@ -27,8 +27,22 @@ const (
 	FileTypePNG     FileType = "png"
 	FileTypeWebP    FileType = "webp"
 	FileTypeOffice  FileType = "office"
+	FileTypeText    FileType = "text"
 	FileTypeUnknown FileType = "unknown"
 )
+
+// isPlainText checks whether the header bytes contain printable text / ASCII / UTF-8
+func isPlainText(data []byte) bool {
+	if len(data) == 0 {
+		return false
+	}
+	for _, b := range data {
+		if b < 0x09 || (b > 0x0D && b < 0x20 && b != 0x1B) {
+			return false
+		}
+	}
+	return true
+}
 
 // SniffFileType inspects the first 512 bytes for genuine magic bytes
 func SniffFileType(header []byte) FileType {
@@ -61,6 +75,11 @@ func SniffFileType(header []byte) FileType {
 		return FileTypeOffice
 	}
 
+	// Plain text
+	if isPlainText(header) {
+		return FileTypeText
+	}
+
 	return FileTypeUnknown
 }
 
@@ -85,15 +104,39 @@ func ValidateFileHeader(r io.Reader, reportedSize int64, expectedAction string) 
 	}
 
 	// 3. Action-specific constraints
-	if strings.HasPrefix(expectedAction, "merge") ||
-		strings.HasPrefix(expectedAction, "split") ||
-		strings.HasPrefix(expectedAction, "compress") ||
-		strings.HasPrefix(expectedAction, "pdf_to") ||
-		strings.HasPrefix(expectedAction, "pdf-to") ||
-		strings.HasPrefix(expectedAction, "extract_") ||
-		strings.HasPrefix(expectedAction, "extract-") {
+	normAction := strings.ToLower(strings.ReplaceAll(expectedAction, "_", "-"))
+	switch {
+	case normAction == "compress-pdf" || strings.HasPrefix(normAction, "pdf-to-") || strings.HasPrefix(normAction, "merge") || strings.HasPrefix(normAction, "split") || strings.HasPrefix(normAction, "extract-"):
 		if detected != FileTypePDF {
-			return detected, nil, errors.New("action requires valid PDF document")
+			return detected, nil, errors.New("aksi ini membutuhkan dokumen PDF yang valid")
+		}
+	case normAction == "jpg-to-pdf" || normAction == "png-to-pdf" || normAction == "image-to-pdf":
+		if detected != FileTypeJPEG && detected != FileTypePNG && detected != FileTypeWebP {
+			return detected, nil, errors.New("aksi ini membutuhkan berkas gambar yang valid (JPG, PNG, atau WebP)")
+		}
+	case normAction == "jpg-to-png":
+		if detected != FileTypeJPEG {
+			return detected, nil, errors.New("aksi ini membutuhkan berkas gambar JPG/JPEG yang valid")
+		}
+	case normAction == "png-to-jpg":
+		if detected != FileTypePNG {
+			return detected, nil, errors.New("aksi ini membutuhkan berkas gambar PNG yang valid")
+		}
+	case normAction == "image-to-webp" || normAction == "img-to-webp" || normAction == "compress-image":
+		if detected != FileTypeJPEG && detected != FileTypePNG && detected != FileTypeWebP {
+			return detected, nil, errors.New("aksi ini membutuhkan berkas gambar (JPG, PNG, atau WebP)")
+		}
+	case normAction == "webp-to-jpg" || normAction == "webp-to-png":
+		if detected != FileTypeWebP {
+			return detected, nil, errors.New("aksi ini membutuhkan gambar berformat WebP")
+		}
+	case strings.HasSuffix(normAction, "-to-pdf") && (strings.HasPrefix(normAction, "docx") || strings.HasPrefix(normAction, "pptx") || strings.HasPrefix(normAction, "xlsx") || strings.HasPrefix(normAction, "odt") || strings.HasPrefix(normAction, "doc") || strings.HasPrefix(normAction, "ppt") || strings.HasPrefix(normAction, "xls")):
+		if detected != FileTypeOffice {
+			return detected, nil, errors.New("aksi ini membutuhkan berkas dokumen Office yang valid (DOCX, PPTX, XLSX, ODT)")
+		}
+	case normAction == "txt-to-pdf":
+		if detected != FileTypeText {
+			return detected, nil, errors.New("aksi ini membutuhkan berkas teks (.txt)")
 		}
 	}
 

@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -62,6 +65,14 @@ func (p *PopplerEngine) Execute(ctx context.Context, req ConversionJobRequest) (
 		return p.pdfToHtml(ctx, req)
 	case "extract-pdf-images", "extract-images":
 		return p.extractImages(ctx, req)
+	case "jpg-to-png":
+		return p.convertImageFormats(req, "png", "image/png", ".png")
+	case "png-to-jpg", "png-to-jpeg":
+		return p.convertImageFormats(req, "jpeg", "image/jpeg", ".jpg")
+	case "jpg-to-pdf", "png-to-pdf", "image-to-pdf":
+		return p.imagesToPDF(ctx, req)
+	case "docx-to-pdf", "pptx-to-pdf", "xlsx-to-pdf", "odt-to-pdf", "doc-to-pdf", "ppt-to-pdf", "xls-to-pdf", "txt-to-pdf":
+		return p.officeToPDF(ctx, req)
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrUnsupportedAction, req.Action)
 	}
@@ -348,5 +359,154 @@ func (p *PopplerEngine) extractImages(ctx context.Context, req ConversionJobRequ
 		PrimaryPath: matches[0],
 		MimeType:    "image/png",
 		IsArchive:   len(matches) > 1,
+	}, nil
+}
+
+// 8. Convert Image Formats (JPG <-> PNG via Go Standard Library)
+func (p *PopplerEngine) convertImageFormats(req ConversionJobRequest, targetFormat, mimeType, ext string) (*ConversionResult, error) {
+	var outputs []string
+	for i, inPath := range req.InputPaths {
+		inFile, err := os.Open(inPath)
+		if err != nil {
+			return nil, err
+		}
+
+		img, _, err := image.Decode(inFile)
+		inFile.Close()
+		if err != nil {
+			return nil, fmt.Errorf("gagal membaca berkas gambar %s: %w", filepath.Base(inPath), err)
+		}
+
+		baseName := strings.TrimSuffix(filepath.Base(inPath), filepath.Ext(inPath))
+		outFileName := fmt.Sprintf("%s%s", baseName, ext)
+		if len(req.InputPaths) > 1 {
+			outFileName = fmt.Sprintf("converted_%d_%s%s", i+1, baseName, ext)
+		}
+		outPath := filepath.Join(req.OutputDir, outFileName)
+
+		outFile, err := os.Create(outPath)
+		if err != nil {
+			return nil, err
+		}
+
+		if targetFormat == "png" {
+			err = png.Encode(outFile, img)
+		} else {
+			err = jpeg.Encode(outFile, img, &jpeg.Options{Quality: 95})
+		}
+		outFile.Close()
+		if err != nil {
+			return nil, fmt.Errorf("gagal mengekspor gambar ke format %s: %w", targetFormat, err)
+		}
+
+		outputs = append(outputs, outPath)
+	}
+
+	return &ConversionResult{
+		OutputPaths: outputs,
+		PrimaryPath: outputs[0],
+		MimeType:    mimeType,
+		IsArchive:   len(outputs) > 1,
+	}, nil
+}
+
+// 9. Images to PDF (via LibreOffice Headless & Poppler pdfunite)
+func (p *PopplerEngine) imagesToPDF(ctx context.Context, req ConversionJobRequest) (*ConversionResult, error) {
+	var intermediatePDFs []string
+	libreBin := "libreoffice"
+
+	for i, inPath := range req.InputPaths {
+		args := []string{
+			"--headless",
+			"--convert-to", "pdf",
+			"--outdir", req.OutputDir,
+			inPath,
+		}
+
+		if err := p.executeCommand(ctx, req.OutputDir, libreBin, args...); err != nil {
+			return nil, err
+		}
+
+		baseName := strings.TrimSuffix(filepath.Base(inPath), filepath.Ext(inPath))
+		pdfPath := filepath.Join(req.OutputDir, fmt.Sprintf("%s.pdf", baseName))
+		if _, err := os.Stat(pdfPath); err == nil {
+			intermediatePDFs = append(intermediatePDFs, pdfPath)
+		} else {
+			matches, _ := filepath.Glob(filepath.Join(req.OutputDir, "*.pdf"))
+			if len(matches) > i {
+				intermediatePDFs = append(intermediatePDFs, matches[i])
+			}
+		}
+	}
+
+	if len(intermediatePDFs) == 0 {
+		return nil, fmt.Errorf("gagal mengonversi gambar menjadi PDF")
+	}
+
+	if len(intermediatePDFs) == 1 {
+		return &ConversionResult{
+			OutputPaths: intermediatePDFs,
+			PrimaryPath: intermediatePDFs[0],
+			MimeType:    "application/pdf",
+			IsArchive:   false,
+		}, nil
+	}
+
+	// Merge multiple image PDFs into one
+	finalMerged := filepath.Join(req.OutputDir, "images_merged.pdf")
+	mergeArgs := append([]string{}, intermediatePDFs...)
+	mergeArgs = append(mergeArgs, finalMerged)
+	bin := p.resolveBinary("pdfunite")
+	if err := p.executeCommand(ctx, req.OutputDir, bin, mergeArgs...); err != nil {
+		return nil, err
+	}
+
+	return &ConversionResult{
+		OutputPaths: []string{finalMerged},
+		PrimaryPath: finalMerged,
+		MimeType:    "application/pdf",
+		IsArchive:   false,
+	}, nil
+}
+
+// 10. Office Documents to PDF (via LibreOffice Headless)
+func (p *PopplerEngine) officeToPDF(ctx context.Context, req ConversionJobRequest) (*ConversionResult, error) {
+	var outputs []string
+	libreBin := "libreoffice"
+
+	for _, inPath := range req.InputPaths {
+		args := []string{
+			"--headless",
+			"--convert-to", "pdf",
+			"--outdir", req.OutputDir,
+			inPath,
+		}
+
+		if err := p.executeCommand(ctx, req.OutputDir, libreBin, args...); err != nil {
+			return nil, err
+		}
+
+		baseName := strings.TrimSuffix(filepath.Base(inPath), filepath.Ext(inPath))
+		expectedPDF := filepath.Join(req.OutputDir, fmt.Sprintf("%s.pdf", baseName))
+
+		if _, err := os.Stat(expectedPDF); err == nil {
+			outputs = append(outputs, expectedPDF)
+		} else {
+			matches, _ := filepath.Glob(filepath.Join(req.OutputDir, "*.pdf"))
+			if len(matches) > 0 {
+				outputs = append(outputs, matches[len(matches)-1])
+			}
+		}
+	}
+
+	if len(outputs) == 0 {
+		return nil, fmt.Errorf("konversi dokumen Office tidak menghasilkan berkas PDF")
+	}
+
+	return &ConversionResult{
+		OutputPaths: outputs,
+		PrimaryPath: outputs[0],
+		MimeType:    "application/pdf",
+		IsArchive:   len(outputs) > 1,
 	}, nil
 }

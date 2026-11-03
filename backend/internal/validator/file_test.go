@@ -21,9 +21,14 @@ func TestSniffFileType(t *testing.T) {
 		t.Fatalf("expected JPEG, got %v", SniffFileType(jpegHeader))
 	}
 
-	fakeHeader := []byte("plain text content")
-	if SniffFileType(fakeHeader) != FileTypeUnknown {
-		t.Fatalf("expected Unknown for plain text, got %v", SniffFileType(fakeHeader))
+	txtHeader := []byte("plain text content")
+	if SniffFileType(txtHeader) != FileTypeText {
+		t.Fatalf("expected FileTypeText for plain text, got %v", SniffFileType(txtHeader))
+	}
+
+	randomBinary := []byte{0x00, 0x01, 0x02, 0x03}
+	if SniffFileType(randomBinary) != FileTypeUnknown {
+		t.Fatalf("expected Unknown for random binary, got %v", SniffFileType(randomBinary))
 	}
 }
 

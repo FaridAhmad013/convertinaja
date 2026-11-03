@@ -1,6 +1,6 @@
 export type CategoryType = 'pdf' | 'image' | 'office'
 
-export type FileFormat = 'pdf' | 'jpg' | 'jpeg' | 'png' | 'webp' | 'docx' | 'xlsx' | 'pptx' | 'doc' | 'odt' | 'unknown'
+export type FileFormat = 'pdf' | 'jpg' | 'jpeg' | 'png' | 'webp' | 'docx' | 'xlsx' | 'pptx' | 'doc' | 'odt' | 'txt' | 'unknown'
 
 export interface UploadedFile {
   id: string
