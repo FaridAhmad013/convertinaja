@@ -8,8 +8,10 @@ import { InlineToolSelector } from './components/InlineToolSelector'
 import { ConversionStatus } from './components/ConversionStatus'
 import { ToolsCatalog } from './components/ToolsCatalog'
 import { HowItWorks } from './components/HowItWorks'
+import { EditorialGuides } from './components/EditorialGuides'
 import { Footer } from './components/Footer'
 import { Toast } from './components/Toast'
+import { LegalModal, type LegalTab } from './components/LegalModal'
 import type { UploadedFile, ToolDefinition } from './types/conversion'
 import { validateUploadedFile } from './services/toolsCatalog'
 import { useConversion } from './hooks/useConversion'
@@ -21,6 +23,10 @@ export function App() {
   const [catalogCategory, setCatalogCategory] = useState<string>('all')
   const [preferredToolId, setPreferredToolId] = useState<string | null>(null)
   const [filePickerAccept, setFilePickerAccept] = useState<string | undefined>(undefined)
+
+  // Legal Modal State (Privacy, Terms, About, Contact)
+  const [isLegalOpen, setIsLegalOpen] = useState(false)
+  const [legalTab, setLegalTab] = useState<LegalTab>('privacy')
 
   const uploadSectionRef = useRef<HTMLDivElement>(null)
   const toolSelectorRef = useRef<HTMLDivElement>(null)
@@ -134,6 +140,11 @@ export function App() {
     toolsEl?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const handleOpenLegal = (tab: LegalTab) => {
+    setLegalTab(tab)
+    setIsLegalOpen(true)
+  }
+
   return (
     <I18nContext.Provider value={i18n}>
       <div className="min-h-screen flex flex-col bg-white">
@@ -206,10 +217,21 @@ export function App() {
           <div className="border-t border-[#E2E8F0] bg-[#F8FAFC]">
             <HowItWorks />
           </div>
+
+          {/* 3.6 Editorial Guides, Technical Guarantee & FAQ (AdSense Value Defense) */}
+          <EditorialGuides />
         </main>
 
-        {/* 3.6 Footer */}
-        <Footer />
+        {/* 3.7 Footer */}
+        <Footer onOpenLegal={handleOpenLegal} />
+
+        {/* Legal & Info Modal (Privacy Policy, Terms of Service, About Us, Contact) */}
+        <LegalModal
+          isOpen={isLegalOpen}
+          tab={legalTab}
+          onClose={() => setIsLegalOpen(false)}
+          onSelectTab={setLegalTab}
+        />
 
         {/* Floating Feedback Toasts */}
         <Toast toasts={toasts} onDismiss={dismissToast} />

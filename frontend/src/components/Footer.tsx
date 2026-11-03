@@ -1,13 +1,20 @@
 import { ShieldCheck, FileCode2 } from 'lucide-react'
 import { useI18n } from '../i18n'
+import type { LegalTab } from './LegalModal'
 
-export function Footer() {
-  const { t } = useI18n()
+interface FooterProps {
+  onOpenLegal: (tab: LegalTab) => void
+}
+
+export function Footer({ onOpenLegal }: FooterProps) {
+  const { lang, t } = useI18n()
+  const isId = lang === 'id'
 
   return (
     <footer className="w-full bg-white border-t border-[#E2E8F0]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        {/* Top Section */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-[#E2E8F0] text-center md:text-left">
           {/* Logo & Tagline */}
           <div className="space-y-1">
             <div className="flex items-center justify-center md:justify-start gap-2">
@@ -23,14 +30,49 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Privacy highlights */}
+          {/* Privacy badge */}
           <div className="flex items-center gap-2 text-xs text-[#64748B] bg-slate-50 px-3.5 py-2 rounded-lg border border-[#E2E8F0]">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span>{t.footer.privacyGuaranteed}</span>
           </div>
+        </div>
 
-          {/* Links / Copyright */}
-          <div className="flex items-center gap-4 text-xs text-[#64748B]">
+        {/* Bottom Section: Legal Navigation & Copyright */}
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#64748B]">
+          {/* Legal Navigation Links */}
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-medium">
+            <button
+              type="button"
+              onClick={() => onOpenLegal('privacy')}
+              className="hover:text-[#2563EB] transition-colors cursor-pointer"
+            >
+              {isId ? 'Kebijakan Privasi' : 'Privacy Policy'}
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenLegal('terms')}
+              className="hover:text-[#2563EB] transition-colors cursor-pointer"
+            >
+              {isId ? 'Syarat & Ketentuan' : 'Terms of Service'}
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenLegal('about')}
+              className="hover:text-[#2563EB] transition-colors cursor-pointer"
+            >
+              {isId ? 'Tentang Kami' : 'About Us'}
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenLegal('contact')}
+              className="hover:text-[#2563EB] transition-colors cursor-pointer"
+            >
+              {isId ? 'Hubungi Kami' : 'Contact'}
+            </button>
+          </div>
+
+          {/* Links & Copyright */}
+          <div className="flex items-center gap-4">
             <a
               href="https://github.com/faridahmad013/convertinaja"
               target="_blank"
