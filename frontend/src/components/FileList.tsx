@@ -18,15 +18,15 @@ function formatBytes(bytes: number): string {
 
 function getFileIcon(format: string) {
   if (format === 'pdf') {
-    return <FileText className="w-5 h-5 text-red-500" />
+    return <FileText className="w-5 h-5 text-[#DC2626]" />
   }
   if (['jpg', 'jpeg', 'png', 'webp'].includes(format)) {
-    return <ImageIcon className="w-5 h-5 text-blue-500" />
+    return <ImageIcon className="w-5 h-5 text-[#2563EB]" />
   }
   if (['docx', 'doc', 'xlsx', 'pptx', 'odt'].includes(format)) {
-    return <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
+    return <FileSpreadsheet className="w-5 h-5 text-[#16A34A]" />
   }
-  return <FileText className="w-5 h-5 text-slate-400" />
+  return <FileText className="w-5 h-5 text-[#64748B]" />
 }
 
 export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: FileListProps) {
@@ -34,14 +34,14 @@ export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: File
   const totalCount = files.length
 
   return (
-    <div className="w-full max-w-[760px] mx-auto bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-5 shadow-xs">
+    <div className="w-full max-w-[800px] mx-auto bg-white border border-[#E2E8F0] rounded-xl p-4 sm:p-5 shadow-xs">
       {/* Header bar */}
       <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] mb-3">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-sm sm:text-base text-[#0F172A]">
             Daftar Berkas Terunggah
           </span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-[#64748B] font-medium">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#64748B] font-medium">
             {validCount} dari {totalCount} valid
           </span>
         </div>
@@ -50,7 +50,7 @@ export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: File
           type="button"
           onClick={onAddMoreClick}
           disabled={disabled}
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#EFF6FF] px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah File</span>
@@ -64,30 +64,30 @@ export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: File
             key={f.id}
             className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
               f.isValid
-                ? 'border-[#E2E8F0] bg-slate-50/50 hover:bg-slate-50'
+                ? 'border-[#E2E8F0] bg-[#F8FAFC] hover:bg-slate-50'
                 : 'border-red-200 bg-red-50/40'
             }`}
           >
             <div className="flex items-center gap-3 min-w-0 pr-2">
-              <div className="p-2 rounded bg-white border border-[#E2E8F0] shrink-0">
+              <div className="p-2 rounded-lg bg-white border border-[#E2E8F0] shrink-0">
                 {getFileIcon(f.format)}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-[#0F172A] truncate" title={f.name}>
                   {f.name}
                 </p>
-                <div className="flex items-center gap-2 text-xs text-[#64748B]">
+                <div className="flex items-center gap-2 text-xs text-[#64748B] mt-0.5">
                   <span>{formatBytes(f.size)}</span>
                   <span>•</span>
                   <span className="uppercase font-semibold text-[10px] bg-slate-200/80 px-1.5 py-0.2 rounded">
                     {f.format}
                   </span>
                   {f.isValid ? (
-                    <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-medium ml-1">
+                    <span className="inline-flex items-center gap-1 text-[#16A34A] text-xs font-medium ml-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Siap
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-red-600 text-xs font-medium ml-1 truncate">
+                    <span className="inline-flex items-center gap-1 text-[#DC2626] text-xs font-medium ml-1 truncate">
                       <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {f.errorMessage}
                     </span>
                   )}
@@ -99,8 +99,9 @@ export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: File
               type="button"
               onClick={() => onRemoveFile(f.id)}
               disabled={disabled}
-              className="p-1.5 text-[#64748B] hover:text-red-600 hover:bg-white rounded-md transition-colors shrink-0 cursor-pointer"
-              aria-label={`Hapus file ${f.name}`}
+              className="p-1.5 text-[#64748B] hover:text-[#DC2626] hover:bg-red-50 rounded-lg transition-colors cursor-pointer shrink-0"
+              title="Hapus berkas ini"
+              aria-label={`Hapus ${f.name}`}
             >
               <Trash2 className="w-4 h-4" />
             </button>

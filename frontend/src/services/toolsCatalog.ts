@@ -45,6 +45,8 @@ export const AVAILABLE_TOOLS: ToolDefinition[] = [
     minFiles: 1,
     maxFiles: 5,
     outputFormat: 'JPG (ZIP)',
+    requiresOptions: true,
+    optionsType: 'quality',
   },
   {
     id: 'pdf-to-png',
@@ -55,6 +57,8 @@ export const AVAILABLE_TOOLS: ToolDefinition[] = [
     minFiles: 1,
     maxFiles: 5,
     outputFormat: 'PNG (ZIP)',
+    requiresOptions: true,
+    optionsType: 'quality',
   },
   {
     id: 'pdf-to-txt',

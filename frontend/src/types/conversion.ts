@@ -22,7 +22,7 @@ export interface ToolDefinition {
   maxFiles: number
   outputFormat: string
   requiresOptions?: boolean
-  optionsType?: 'compression_level' | 'page_range' | 'image_format'
+  optionsType?: 'compression_level' | 'page_range' | 'image_format' | 'quality'
 }
 
 export type JobStatus = 

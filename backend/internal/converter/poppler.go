@@ -200,12 +200,35 @@ func (p *PopplerEngine) pdfToImage(ctx context.Context, req ConversionJobRequest
 	inPath := req.InputPaths[0]
 	prefix := filepath.Join(req.OutputDir, "page")
 
+	// Default: HD Print Quality (300 DPI)
+	dpi := 300
+	if req.Options != nil {
+		if d, ok := req.Options["dpi"].(float64); ok && d > 0 {
+			dpi = int(d)
+		} else if d, ok := req.Options["dpi"].(int); ok && d > 0 {
+			dpi = d
+		}
+	}
+
 	args := []string{
 		fmt.Sprintf("-%s", formatFlag),
-		"-r", "150",
-		inPath,
-		prefix,
+		"-r", strconv.Itoa(dpi),
 	}
+
+	// For JPEG, configure crisp quality (default 95%)
+	if formatFlag == "jpeg" {
+		jpegQuality := 95
+		if req.Options != nil {
+			if q, ok := req.Options["jpegQuality"].(float64); ok && q > 0 {
+				jpegQuality = int(q)
+			} else if q, ok := req.Options["jpegQuality"].(int); ok && q > 0 {
+				jpegQuality = q
+			}
+		}
+		args = append(args, "-jpegopt", fmt.Sprintf("quality=%d", jpegQuality))
+	}
+
+	args = append(args, inPath, prefix)
 
 	bin := p.resolveBinary("pdftoppm")
 	if err := p.executeCommand(ctx, req.OutputDir, bin, args...); err != nil {

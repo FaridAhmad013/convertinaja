@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Navbar } from './components/Navbar'
 import { Hero } from './components/Hero'
 import { UploadZone } from './components/UploadZone'
+import { PopularTools } from './components/PopularTools'
 import { FileList } from './components/FileList'
 import { InlineToolSelector } from './components/InlineToolSelector'
 import { ConversionStatus } from './components/ConversionStatus'
@@ -115,19 +116,19 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* 3.1 Navbar */}
       <Navbar onSelectCategory={handleCategorySelect} />
 
-      <main className="flex-1">
+      <main className="flex-1 pb-16">
         {/* 3.2 Hero Section */}
         <Hero />
 
-        {/* 3.3 Upload Section & Inline Experience */}
+        {/* 3.3 Upload Section & Conversion Experience */}
         <section
           ref={uploadSectionRef}
           aria-label="Upload and Conversion Area"
-          className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4"
+          className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4 space-y-6"
         >
           {/* Active Job / Result View */}
           {job ? (
@@ -142,16 +143,19 @@ export function App() {
                 disabled={Boolean(job)}
               />
 
-              {/* Uploaded File List */}
-              {uploadedFiles.length > 0 && (
-                <div className="space-y-4 mt-4">
+              {/* When no files are uploaded, show Popular Tools preview */}
+              {uploadedFiles.length === 0 ? (
+                <PopularTools onSelectTool={(_toolId) => handleAddMoreFiles()} />
+              ) : (
+                /* When files are uploaded, show File List and Grouped Tool Selector */
+                <div className="space-y-4 mt-6">
                   <FileList
                     files={uploadedFiles}
                     onRemoveFile={handleRemoveFile}
                     onAddMoreClick={handleAddMoreFiles}
                   />
 
-                  {/* 4.4 Inline Tool Selection */}
+                  {/* 4.4 Inline Tool Selection & Quality Options */}
                   <div ref={toolSelectorRef} className="scroll-mt-6">
                     <InlineToolSelector
                       files={uploadedFiles}
@@ -164,17 +168,21 @@ export function App() {
           )}
         </section>
 
-        {/* 3.4 Tools Section */}
-        <ToolsCatalog
-          activeCategory={catalogCategory}
-          onSelectToolTrigger={(_toolId) => {
-            uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
-            handleAddMoreFiles()
-          }}
-        />
+        {/* 3.4 Full Tools Catalog */}
+        <div className="mt-12 border-t border-[#E2E8F0]">
+          <ToolsCatalog
+            activeCategory={catalogCategory}
+            onSelectToolTrigger={(_toolId) => {
+              uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
+              handleAddMoreFiles()
+            }}
+          />
+        </div>
 
         {/* 3.5 How It Works */}
-        <HowItWorks />
+        <div className="border-t border-[#E2E8F0] bg-[#F8FAFC]">
+          <HowItWorks />
+        </div>
       </main>
 
       {/* 3.6 Footer */}
