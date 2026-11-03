@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Navbar } from './components/Navbar'
 import { Hero } from './components/Hero'
 import { UploadZone } from './components/UploadZone'
@@ -17,6 +17,8 @@ export function App() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [catalogCategory, setCatalogCategory] = useState<string>('all')
   const uploadSectionRef = useRef<HTMLDivElement>(null)
+  const toolSelectorRef = useRef<HTMLDivElement>(null)
+  const statusSectionRef = useRef<HTMLDivElement>(null)
 
   const {
     job,
@@ -26,6 +28,15 @@ export function App() {
     addToast,
     dismissToast,
   } = useConversion()
+
+  // Auto-scroll to conversion progress status when job changes
+  useEffect(() => {
+    if (job) {
+      setTimeout(() => {
+        statusSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 50)
+    }
+  }, [job])
 
   // Handle files added via Drag & Drop or File Picker
   const handleFilesAdded = (files: FileList | File[]) => {
@@ -53,6 +64,11 @@ export function App() {
     }
 
     setUploadedFiles((prev) => [...prev, ...newItems])
+
+    // Smooth scroll to inline tool selector upon selecting files
+    setTimeout(() => {
+      toolSelectorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 150)
   }
 
   // Remove a single file from the list
@@ -75,12 +91,20 @@ export function App() {
     }
 
     startConversion(validRawFiles, tool, options)
+
+    // Smooth scroll to progress area
+    setTimeout(() => {
+      statusSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   // Reset to upload another
   const handleReset = () => {
     resetJob()
     setUploadedFiles([])
+    setTimeout(() => {
+      uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   // Scroll to tools catalog
@@ -107,7 +131,9 @@ export function App() {
         >
           {/* Active Job / Result View */}
           {job ? (
-            <ConversionStatus job={job} onReset={handleReset} />
+            <div ref={statusSectionRef} className="scroll-mt-6">
+              <ConversionStatus job={job} onReset={handleReset} />
+            </div>
           ) : (
             <>
               {/* Dropzone Area */}
@@ -126,10 +152,12 @@ export function App() {
                   />
 
                   {/* 4.4 Inline Tool Selection */}
-                  <InlineToolSelector
-                    files={uploadedFiles}
-                    onStartConversion={handleStartConversion}
-                  />
+                  <div ref={toolSelectorRef} className="scroll-mt-6">
+                    <InlineToolSelector
+                      files={uploadedFiles}
+                      onStartConversion={handleStartConversion}
+                    />
+                  </div>
                 </div>
               )}
             </>

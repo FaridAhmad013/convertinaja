@@ -66,6 +66,11 @@ func (p *PopplerEngine) Execute(ctx context.Context, req ConversionJobRequest) (
 
 // executeCommand wraps exec.CommandContext, executes in isolated Dir, logs stderr
 func (p *PopplerEngine) executeCommand(ctx context.Context, dir, binary string, args ...string) error {
+	// Check if executable exists in PATH or binDir
+	if _, err := exec.LookPath(binary); err != nil {
+		return fmt.Errorf("binary '%s' tidak ditemukan di sistem PATH. Pastikan Poppler/Ghostscript terpasang (misal: 'winget install oschwartz10612.Poppler' atau gunakan Docker): %w", binary, err)
+	}
+
 	cmd := exec.CommandContext(ctx, binary, args...)
 	cmd.Dir = dir
 
@@ -85,7 +90,10 @@ func (p *PopplerEngine) executeCommand(ctx context.Context, dir, binary string, 
 			Str("binary", binary).
 			Str("stderr", errMsg).
 			Msg("Engine command failed")
-		return fmt.Errorf("%w: %s (%v)", ErrExecutionFailed, errMsg, err)
+		if errMsg != "" {
+			return fmt.Errorf("%w: %s", ErrExecutionFailed, errMsg)
+		}
+		return fmt.Errorf("%w: %v", ErrExecutionFailed, err)
 	}
 
 	return nil
