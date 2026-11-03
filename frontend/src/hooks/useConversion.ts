@@ -10,8 +10,7 @@ import {
 } from '../services/api'
 
 const STORAGE_KEY = 'convertinaja_active_job'
-const POLL_INTERVAL_MS = 2000
-const MAX_POLL_ATTEMPTS = 60 // 2 minutes max polling
+const POLL_INTERVAL_MS = 1000 // Fast 1s polling for instant UI feedback
 
 export function useConversion() {
   const [job, setJob] = useState<ConversionJobResult | null>(() => {
@@ -24,10 +23,7 @@ export function useConversion() {
   })
 
   const [toasts, setToasts] = useState<ToastMessage[]>([])
-  const pollAttempts = useRef(0)
-  const pollTimeoutRef = useRef<number | null>(null)
-  const pollingJobIdRef = useRef<string | null>(null)
-  const pollJobStatusRef = useRef<(jobId: string, token: string) => Promise<void>>(async () => {})
+  const hasNotifiedSuccessRef = useRef<string | null>(null)
 
   // Sync active job to sessionStorage
   const updateJobState = useCallback((newJob: ConversionJobResult | null) => {
@@ -71,7 +67,7 @@ export function useConversion() {
           action: actionName,
           filesCount,
         })
-      }, 800)
+      }, 500)
 
       setTimeout(() => {
         updateJobState({
@@ -81,7 +77,7 @@ export function useConversion() {
           action: actionName,
           filesCount,
         })
-      }, 1800)
+      }, 1000)
 
       setTimeout(() => {
         updateJobState({
@@ -95,91 +91,15 @@ export function useConversion() {
           fileSize: 1024 * 350,
         })
         addToast('success', 'Konversi dev berhasil diselesaikan!')
-      }, 3600)
+      }, 1800)
     },
     [addToast, updateJobState]
   )
-
-  // Poll job status from API
-  const pollJobStatus = useCallback(
-    async (jobId: string, token: string) => {
-      try {
-        const res = await getJobStatus(jobId, token)
-
-        if (res.status === 'completed') {
-          pollingJobIdRef.current = null
-          updateJobState({
-            jobId,
-            accessToken: token,
-            status: 'completed',
-            action: res.action,
-            downloadUrl: res.download_url || buildDownloadUrl(jobId, token),
-            batchDownloadUrl: res.batch_download_url,
-            filesCount: 1,
-            fileSize: res.file_size,
-            expiresAt: res.expires_at,
-          })
-          addToast('success', 'Konversi berhasil diselesaikan!')
-          return
-        }
-
-        if (res.status === 'failed') {
-          pollingJobIdRef.current = null
-          updateJobState({
-            jobId,
-            accessToken: token,
-            status: 'failed',
-            action: res.action,
-            filesCount: 1,
-            errorMessage: res.error_message || 'Proses konversi gagal.',
-          })
-          addToast('error', res.error_message || 'Konversi gagal diproses.')
-          return
-        }
-
-        // Still queued or processing
-        updateJobState({
-          jobId,
-          accessToken: token,
-          status: res.status,
-          action: res.action,
-          filesCount: 1,
-        })
-
-        pollAttempts.current += 1
-        if (pollAttempts.current < MAX_POLL_ATTEMPTS) {
-          pollTimeoutRef.current = window.setTimeout(() => {
-            pollJobStatusRef.current(jobId, token)
-          }, POLL_INTERVAL_MS)
-        } else {
-          updateJobState({
-            jobId,
-            accessToken: token,
-            status: 'failed',
-            action: res.action,
-            filesCount: 1,
-            errorMessage: 'Batas waktu pengerjaan konversi habis (timeout).',
-          })
-          addToast('error', 'Waktu konversi habis. Silakan coba kembali.')
-        }
-      } catch (err) {
-        const errorMsg = err instanceof ApiError ? err.message : 'Koneksi ke server terputus.'
-        addToast('error', errorMsg)
-      }
-    },
-    [addToast, updateJobState]
-  )
-
-  // Keep ref updated
-  useEffect(() => {
-    pollJobStatusRef.current = pollJobStatus
-  }, [pollJobStatus])
 
   // Start conversion
   const startConversion = useCallback(
     async (files: File[], tool: ToolDefinition, options: Record<string, unknown>) => {
-      pollAttempts.current = 0
-      if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
+      hasNotifiedSuccessRef.current = null
 
       // Initial local state: uploading
       const tempId = Math.random().toString(36).substring(2, 9)
@@ -197,18 +117,13 @@ export function useConversion() {
         updateJobState({
           jobId: created.job_id,
           accessToken: created.access_token,
-          status: 'queued',
+          status: created.status === 'completed' ? 'completed' : 'processing',
           action: tool.name,
           filesCount: files.length,
         })
-
-        // Begin polling
-        pollingJobIdRef.current = created.job_id
-        pollJobStatusRef.current(created.job_id, created.access_token)
       } catch (err) {
-        // Fallback for development if backend API server is not running yet
         if (err instanceof TypeError && err.message.includes('fetch')) {
-          addToast('info', 'Backend API offline — menjalankan simulasi konversi dev.')
+          addToast('info', 'Backend API offline — menjalankan simulasi dev.')
           runDevSimulation(files.length, tool.name)
           return
         }
@@ -228,31 +143,85 @@ export function useConversion() {
     [addToast, runDevSimulation, updateJobState]
   )
 
+  // Polling loop effect: Runs when active job is queued or processing
+  useEffect(() => {
+    if (!job?.jobId || !job.accessToken) return
+    if (!['queued', 'processing', 'validating'].includes(job.status)) return
+
+    let isSubscribed = true
+    const currentJobId = job.jobId
+    const currentToken = job.accessToken
+
+    const poll = async () => {
+      try {
+        const res = await getJobStatus(currentJobId, currentToken)
+        if (!isSubscribed) return
+
+        if (res.status === 'completed') {
+          updateJobState({
+            jobId: currentJobId,
+            accessToken: currentToken,
+            status: 'completed',
+            action: res.action,
+            downloadUrl: res.download_url || buildDownloadUrl(currentJobId, currentToken),
+            batchDownloadUrl: res.batch_download_url,
+            filesCount: 1,
+            fileSize: res.file_size,
+            expiresAt: res.expires_at,
+          })
+
+          if (hasNotifiedSuccessRef.current !== currentJobId) {
+            hasNotifiedSuccessRef.current = currentJobId
+            addToast('success', 'Konversi berhasil diselesaikan!')
+          }
+          return
+        }
+
+        if (res.status === 'failed') {
+          updateJobState({
+            jobId: currentJobId,
+            accessToken: currentToken,
+            status: 'failed',
+            action: res.action,
+            filesCount: 1,
+            errorMessage: res.error_message || 'Proses konversi gagal.',
+          })
+          addToast('error', res.error_message || 'Konversi gagal diproses.')
+          return
+        }
+
+        // Only update if status string changed to avoid re-triggering effects unnecessarily
+        if (res.status !== job.status) {
+          updateJobState({
+            jobId: currentJobId,
+            accessToken: currentToken,
+            status: res.status,
+            action: res.action,
+            filesCount: 1,
+          })
+        }
+      } catch {
+        // Silently retry on transient network hiccups during polling
+      }
+    }
+
+    // Trigger immediate check, then interval every 1 second
+    poll()
+    const intervalTimer = setInterval(poll, POLL_INTERVAL_MS)
+
+    return () => {
+      isSubscribed = false
+      clearInterval(intervalTimer)
+    }
+  }, [job?.jobId, job?.accessToken, job?.status, addToast, updateJobState])
+
   const resetJob = useCallback(() => {
-    if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
-    pollingJobIdRef.current = null
+    hasNotifiedSuccessRef.current = null
     if (job?.jobId && job.accessToken) {
       cancelConversionJob(job.jobId, job.accessToken).catch(() => {})
     }
     updateJobState(null)
   }, [job, updateJobState])
-
-  // Resume polling on refresh if active job was processing
-  useEffect(() => {
-    if (
-      job?.jobId &&
-      job.accessToken &&
-      ['queued', 'processing'].includes(job.status) &&
-      pollingJobIdRef.current !== job.jobId
-    ) {
-      pollingJobIdRef.current = job.jobId
-      pollJobStatusRef.current(job.jobId, job.accessToken)
-    }
-
-    return () => {
-      if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
-    }
-  }, [job?.jobId, job?.accessToken, job?.status])
 
   return {
     job,
