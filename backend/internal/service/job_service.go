@@ -76,8 +76,10 @@ func generateSecureToken() string {
 	return hex.EncodeToString(b)
 }
 
-func (s *JobService) CreateJob(ctx context.Context, action string, inputPaths []string, options map[string]interface{}) (*JobRecord, error) {
-	jobID := uuid.New().String()
+func (s *JobService) CreateJob(ctx context.Context, jobID, action string, inputPaths []string, options map[string]interface{}) (*JobRecord, error) {
+	if jobID == "" {
+		jobID = uuid.New().String()
+	}
 	token := generateSecureToken()
 	now := time.Now()
 

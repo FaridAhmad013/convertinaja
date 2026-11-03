@@ -117,7 +117,7 @@ func (h *ConversionHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
 		savedPaths = append(savedPaths, savedPath)
 	}
 
-	job, err := h.jobService.CreateJob(r.Context(), action, savedPaths, options)
+	job, err := h.jobService.CreateJob(r.Context(), preliminaryJobID, action, savedPaths, options)
 	if err != nil {
 		_ = h.storage.CleanupJob(preliminaryJobID)
 		writeError(w, http.StatusInternalServerError, "Failed to create conversion job")

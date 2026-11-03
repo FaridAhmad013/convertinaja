@@ -1,0 +1,22 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+
+# Node / Frontend
+**/node_modules
+**/dist
+**/.turbo
+
+# Go / Backend
+**/bin
+**/tmp
+**/*.exe
+**/*.test
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea
+.vscode
