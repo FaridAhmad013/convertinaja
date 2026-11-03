@@ -144,8 +144,8 @@ Token ini berumur pendek, terikat pada satu `job_id`, dan mencegah pihak ketiga 
 - **MIME Sniffing:** Validasi magic bytes di layer Go backend, tidak percaya hanya pada ekstensi file.
 - **Path Traversal Prevention:** Sanitasi nama file, penamaan ulang acak berbasis UUID untuk file temporary di filesystem.
 - **Batas Ukuran:**
-  - PDF & Image: Maksimal 50MB per file.
-  - Office: Maksimal 30MB per file.
+  - PDF & Image: Maksimal 10MB per file (Maks. 10 file per proses).
+  - Office: Maksimal 10MB per file.
 - **Batas Halaman:** PDF dibatasi maksimal 200 halaman per proses.
 - **Batas File:** Maksimal 10 file per batch job (misal: Merge PDF).
 
@@ -154,5 +154,5 @@ Token ini berumur pendek, terikat pada satu `job_id`, dan mencegah pihak ketiga 
 - **Resource Limits:** Pembatasan memori dan CPU untuk proses konversi diterapkan di level container (Docker cgroups / OS limits), bukan hanya Go context.
 - **Timeout Sandbox:** Subprocess CLI diikat dengan context timeout ketat (default 120 detik per job).
 - **Cleanup Otomatis saat Gagal:** Jika proses timeout, crash, atau dibatalkan, direktori temporary job segera dihapus.
-- **TTL Penyimpanan:** File mentah dan file hasil otomatis dihapus permanen oleh cleanup worker dalam 60 menit.
+- **TTL Penyimpanan:** File mentah sumber langsung dihapus seketika setelah konversi. File hasil konversi otomatis dihapus permanen oleh background worker dalam 10 menit.
 - **Rate Limiting:** Batasan jumlah job aktif dan frekuensi request per alamat IP untuk mencegah DoS.

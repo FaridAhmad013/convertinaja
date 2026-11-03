@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { FileCode2, Menu, X, Globe, ShieldCheck } from 'lucide-react'
+import { FileCode2, Menu, X, Globe } from 'lucide-react'
 import { useI18n } from '../i18n'
+import type { LegalTab } from './LegalModal'
 
 interface NavbarProps {
   onSelectCategory?: (category: string) => void
+  onOpenLegal?: (tab: LegalTab) => void
 }
 
-export function Navbar({ onSelectCategory: _onSelectCategory }: NavbarProps) {
+export function Navbar({ onOpenLegal }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { lang, setLang, t } = useI18n()
 
@@ -20,6 +22,13 @@ export function Navbar({ onSelectCategory: _onSelectCategory }: NavbarProps) {
 
   const toggleLanguage = () => {
     setLang(lang === 'id' ? 'en' : 'id')
+  }
+
+  const handleLegalClick = (tab: LegalTab) => {
+    setMobileMenuOpen(false)
+    if (onOpenLegal) {
+      onOpenLegal(tab)
+    }
   }
 
   return (
@@ -36,7 +45,7 @@ export function Navbar({ onSelectCategory: _onSelectCategory }: NavbarProps) {
         </a>
 
         {/* Desktop Nav Links */}
-        <nav className="hidden md:flex items-center gap-5">
+        <nav className="hidden md:flex items-center gap-6">
           <button
             type="button"
             onClick={() => scrollToSection('tools')}
@@ -51,12 +60,20 @@ export function Navbar({ onSelectCategory: _onSelectCategory }: NavbarProps) {
           >
             {t.nav.howItWorks}
           </button>
-
-          {/* Zero-Storage Assurance Pill */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>{t.nav.zeroStorageBadge}</span>
-          </div>
+          <button
+            type="button"
+            onClick={() => handleLegalClick('privacy')}
+            className="text-sm font-medium text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+          >
+            {t.nav.privacy}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleLegalClick('terms')}
+            className="text-sm font-medium text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+          >
+            {t.nav.terms}
+          </button>
 
           {/* Language Toggle */}
           <button
@@ -70,20 +87,21 @@ export function Navbar({ onSelectCategory: _onSelectCategory }: NavbarProps) {
           </button>
         </nav>
 
-        {/* Mobile Hamburger Button */}
-        <div className="flex items-center gap-2 md:hidden">
+        {/* Mobile Menu Button */}
+        <div className="flex md:hidden items-center gap-2">
           <button
             type="button"
             onClick={toggleLanguage}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-[#E2E8F0] bg-slate-50 text-xs font-semibold text-[#0F172A]"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-[#E2E8F0] bg-slate-50 text-xs font-semibold text-[#0F172A]"
           >
+            <Globe className="w-3.5 h-3.5 text-[#2563EB]" />
             <span className="uppercase">{lang}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-[#64748B] hover:text-[#0F172A] focus:outline-none"
+            className="p-2 text-[#64748B] hover:text-[#0F172A] rounded-lg cursor-pointer"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -91,27 +109,37 @@ export function Navbar({ onSelectCategory: _onSelectCategory }: NavbarProps) {
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Nav Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-[#E2E8F0] bg-white px-4 py-4 space-y-2">
+        <div className="md:hidden border-t border-[#E2E8F0] bg-white px-4 pt-3 pb-6 space-y-3">
           <button
             type="button"
             onClick={() => scrollToSection('tools')}
-            className="w-full text-left py-2 text-sm font-medium text-[#64748B] hover:text-[#0F172A]"
+            className="block w-full text-left py-2 text-sm font-medium text-[#0F172A] hover:text-[#2563EB]"
           >
             {t.nav.tools}
           </button>
           <button
             type="button"
             onClick={() => scrollToSection('how-it-works')}
-            className="w-full text-left py-2 text-sm font-medium text-[#64748B] hover:text-[#0F172A]"
+            className="block w-full text-left py-2 text-sm font-medium text-[#0F172A] hover:text-[#2563EB]"
           >
             {t.nav.howItWorks}
           </button>
-          <div className="py-2 flex items-center gap-1.5 text-xs text-emerald-700 font-semibold">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>{t.nav.zeroStorageBadge}</span>
-          </div>
+          <button
+            type="button"
+            onClick={() => handleLegalClick('privacy')}
+            className="block w-full text-left py-2 text-sm font-medium text-[#0F172A] hover:text-[#2563EB]"
+          >
+            {t.nav.privacy}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleLegalClick('terms')}
+            className="block w-full text-left py-2 text-sm font-medium text-[#0F172A] hover:text-[#2563EB]"
+          >
+            {t.nav.terms}
+          </button>
         </div>
       )}
     </header>

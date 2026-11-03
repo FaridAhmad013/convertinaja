@@ -81,11 +81,11 @@ Homepage terdiri dari enam bagian utama:
 
 ## 4. Upload & Compatibility Rules
 
-- Maximum file sizes: PDF & Images 50MB; Office 30MB.
+- Maximum file sizes: 10MB per file; Maximum 10 files per batch.
 - When multiple files are uploaded: all valid files automatically selected.
 - Inline tools filtered strictly by compatibility with all selected files.
 - Batch download bundles outputs into ZIP if multiple; direct download if single.
-- TTL Notice: 60 minutes retention displayed prominently.
+- TTL Notice: 10 minutes retention displayed with immediate raw source file deletion.
 
 ## 5. Interaction States & Acceptance Criteria
 

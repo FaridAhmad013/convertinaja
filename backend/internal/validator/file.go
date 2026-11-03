@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	MaxPDFImageSizeBytes = 50 * 1024 * 1024 // 50 MB
-	MaxOfficeSizeBytes    = 30 * 1024 * 1024 // 30 MB
+	MaxPDFImageSizeBytes = 10 * 1024 * 1024 // 10 MB limit
+	MaxOfficeSizeBytes    = 10 * 1024 * 1024 // 10 MB limit
 )
 
 var (

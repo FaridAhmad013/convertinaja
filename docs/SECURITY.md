@@ -21,7 +21,7 @@
 
 Every uploaded file must pass validation before writing to disk or dispatching to the queue:
 
-1. **Size Boundary Check:** Reject before reading if `Content-Length > 50MB`.
+1. **Size Boundary Check:** Reject before reading if `Content-Length > 10MB`.
 2. **Magic Bytes Sniffing:** Read first 512 bytes:
    - PDF: must match `%PDF-` header.
    - Images: must match PNG (`\x89PNG\r\n\x1a\n`), JPEG (`\xff\xd8\xff`), or WebP (`RIFF....WEBP`).
@@ -35,4 +35,4 @@ Every uploaded file must pass validation before writing to disk or dispatching t
 - **Directory Isolation:** Files exist exclusively in `/tmp/convertinaja/jobs/{job_id}/`.
 - **Non-Root Execution:** Worker processes run as an unprivileged user inside Docker (`UID 10001`).
 - **Immediate Failure Cleanup:** `defer os.RemoveAll(jobDir)` executes on any failure or cancellation signal.
-- **Strict TTL Purge:** Jobs older than 60 minutes are purged by the background cleaner worker.
+- **Strict TTL Purge:** Source files are purged immediately. Converted files older than 10 minutes are purged by the background cleaner worker.

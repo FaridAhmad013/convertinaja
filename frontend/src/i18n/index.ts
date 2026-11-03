@@ -6,8 +6,10 @@ export interface Translations {
   nav: {
     tools: string
     howItWorks: string
+    privacy: string
+    terms: string
+    creator: string
     changeLang: string
-    zeroStorageBadge: string
   }
   hero: {
     badge: string
@@ -116,8 +118,10 @@ export const translations: Record<Language, Translations> = {
     nav: {
       tools: 'Peralatan',
       howItWorks: 'Cara Kerja',
+      privacy: 'Privasi',
+      terms: 'Ketentuan',
+      creator: 'Farid Ahmad',
       changeLang: 'Ganti Bahasa',
-      zeroStorageBadge: '100% Bebas Jejak (Zero-Storage)',
     },
     hero: {
       badge: 'KONVERSI BERKAS PRAKTIS',
@@ -130,8 +134,8 @@ export const translations: Record<Language, Translations> = {
       dropTitle: 'Tarik & letakkan berkas Anda ke sini',
       dropSubtitle: 'atau klik untuk memilih dari perangkat',
       chooseButton: 'Pilih Berkas',
-      maxLimits: 'Mendukung PDF, JPG, PNG, WEBP, DOCX, XLSX, PPTX hingga 50 MB',
-      privacyNotice: 'Privasi Terjamin: Berkas sumber Anda dimusnahkan seketika setelah pemrosesan selesai.',
+      maxLimits: 'Mendukung PDF, JPG, PNG, WEBP, DOCX, XLSX, PPTX hingga 10 MB (Maks. 10 berkas)',
+      privacyNotice: 'Privasi Terjamin: Berkas sumber Anda dimusnahkan seketika. Berkas hasil otomatis dihapus total dalam 10 menit.',
     },
     popular: {
       title: 'Peralatan Populer',
@@ -190,7 +194,7 @@ export const translations: Record<Language, Translations> = {
       processingSub: 'Mohon tunggu sejenak, sistem sedang menjalankan operasi konversi.',
       downloadButton: 'Unduh Hasil Konversi',
       downloadZipButton: 'Unduh Semua (.zip)',
-      retentionNotice: 'Berkas sumber telah dihapus. Hasil konversi dapat dimusnahkan kapan saja.',
+      retentionNotice: 'Berkas sumber dimusnahkan seketika. Hasil konversi otomatis dibersihkan total dalam 10 menit.',
       purgeNow: 'Hapus dari Server Sekarang',
       purgedSuccess: 'Berkas telah berhasil dimusnahkan permanen dari server!',
       convertAgain: 'Konversi Dokumen Lain',
@@ -224,8 +228,10 @@ export const translations: Record<Language, Translations> = {
     nav: {
       tools: 'Tools',
       howItWorks: 'How it works',
+      privacy: 'Privacy',
+      terms: 'Terms',
+      creator: 'Farid Ahmad',
       changeLang: 'Change Language',
-      zeroStorageBadge: '100% Zero-Storage Guaranteed',
     },
     hero: {
       badge: 'SIMPLE FILE CONVERSION',
@@ -238,8 +244,8 @@ export const translations: Record<Language, Translations> = {
       dropTitle: 'Drop your files here',
       dropSubtitle: 'or click to browse from device',
       chooseButton: 'Choose Files',
-      maxLimits: 'Supports PDF, JPG, PNG, WEBP, DOCX, XLSX, PPTX up to 50 MB',
-      privacyNotice: 'Zero-Storage: Your source files are permanently destroyed right after conversion.',
+      maxLimits: 'Supports PDF, JPG, PNG, WEBP, DOCX, XLSX, PPTX up to 10 MB (Max 10 files)',
+      privacyNotice: 'Zero-Storage: Source files destroyed immediately. Output files auto-purged within 10 minutes.',
     },
     popular: {
       title: 'Popular tools',
@@ -298,7 +304,7 @@ export const translations: Record<Language, Translations> = {
       processingSub: 'Please wait a moment while the conversion engine finishes.',
       downloadButton: 'Download Converted File',
       downloadZipButton: 'Download All (.zip)',
-      retentionNotice: 'Source files have been destroyed. Result can be purged anytime.',
+      retentionNotice: 'Source files destroyed immediately. Converted files are automatically purged within 10 minutes.',
       purgeNow: 'Delete from Server Now',
       purgedSuccess: 'Files permanently destroyed from server!',
       convertAgain: 'Convert Another File',

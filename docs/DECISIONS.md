@@ -32,8 +32,8 @@
 
 ---
 
-## ADR-004: Ephemeral Filesystem Storage with 60-Minute TTL
+## ADR-004: Ephemeral Filesystem Storage with 10-Minute TTL & Instant Source File Shredding
 - **Status:** Accepted
-- **Context:** Uploaded files and conversion results must be stored temporarily. Storing binary files in PostgreSQL bloats the database and complicates backups.
-- **Decision:** Store files in a shared filesystem volume under `/tmp/convertinaja/jobs/{job_id}/`. PostgreSQL holds only metadata (filename, size, status, timestamp). A cleanup worker purges files after 60 minutes or immediately upon failure.
+- **Context:** Uploaded files and conversion results must be strictly ephemeral. Storing binary files permanently violates privacy and bloats disks.
+- **Decision:** Store files in a shared filesystem volume under `/tmp/convertinaja/jobs/{job_id}/`. Source files are destroyed immediately upon job completion or failure. Converted artifacts are purged after 10 minutes by a 2-minute ticker. File limits are 10MB per file and max 10 files per batch.
 - **Consequences:** Storage volume must be shared between API and Worker if deployed in separate containers.

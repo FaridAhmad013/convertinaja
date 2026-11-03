@@ -1,4 +1,4 @@
-import { ShieldCheck, FileCode2 } from 'lucide-react'
+import { FileCode2, ExternalLink } from 'lucide-react'
 import { useI18n } from '../i18n'
 import type { LegalTab } from './LegalModal'
 
@@ -30,10 +30,18 @@ export function Footer({ onOpenLegal }: FooterProps) {
             </p>
           </div>
 
-          {/* Privacy badge */}
-          <div className="flex items-center gap-2 text-xs text-[#64748B] bg-slate-50 px-3.5 py-2 rounded-lg border border-[#E2E8F0]">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>{t.footer.privacyGuaranteed}</span>
+          {/* Matched SaaS Portfolio Badge */}
+          <div className="flex items-center gap-2">
+            <a
+              href="https://faridahmad.dev"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#EFF6FF] hover:border-[#BFDBFE] text-xs font-semibold text-[#0F172A] transition-colors"
+            >
+              <span className="text-[#64748B] font-normal">{isId ? 'Dibuat oleh' : 'Built by'}</span>
+              <span className="text-[#2563EB]">Farid Ahmad</span>
+              <ExternalLink className="w-3.5 h-3.5 text-[#2563EB]" />
+            </a>
           </div>
         </div>
 
@@ -60,7 +68,7 @@ export function Footer({ onOpenLegal }: FooterProps) {
               onClick={() => onOpenLegal('about')}
               className="hover:text-[#2563EB] transition-colors cursor-pointer"
             >
-              {isId ? 'Tentang Kami' : 'About Us'}
+              {isId ? 'Tentang Kami & Lisensi' : 'About & Licenses'}
             </button>
             <button
               type="button"

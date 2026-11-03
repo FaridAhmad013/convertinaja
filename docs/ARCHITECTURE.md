@@ -74,7 +74,7 @@ ConvertinAja is a single-repository decoupled system:
 
 ### 2.4 Ephemeral Storage & Retention Worker
 - Files live in directory `/tmp/convertinaja/jobs/{job_id}/`.
-- A background ticker worker sweeps files older than 60 minutes (TTL) and prunes records.
+- A background ticker worker sweeps files older than 10 minutes (TTL) and prunes records. Source files are shredded immediately upon job completion.
 - After a successful user download, a short grace period (e.g., 5 minutes) triggers purge.
 
 ---

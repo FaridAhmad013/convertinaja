@@ -54,7 +54,7 @@ Base URL: `/api/v1`
 
 - **Error Responses:**
   - `400 Bad Request`: Invalid action, missing files, unsupported MIME type.
-  - `413 Payload Too Large`: File exceeds size limit (> 50MB).
+  - `413 Payload Too Large`: File exceeds size limit (> 10MB).
   - `429 Too Many Requests`: Rate limit exceeded for client IP.
 
 ---

@@ -234,15 +234,13 @@ export function validateUploadedFile(file: File): { isValid: boolean; errorMessa
     }
   }
 
-  // Size constraints: 50MB for PDF/Image, 30MB for Office
-  const isOffice = ['docx', 'xlsx', 'pptx', 'doc', 'odt'].includes(format)
-  const maxBytes = isOffice ? 30 * 1024 * 1024 : 50 * 1024 * 1024
-  const limitLabel = isOffice ? '30 MB' : '50 MB'
+  // Size constraints: Max 10MB per file to keep processing lightweight
+  const maxBytes = 10 * 1024 * 1024
 
   if (file.size > maxBytes) {
     return {
       isValid: false,
-      errorMessage: `Ukuran file melebihi batas ${limitLabel}.`,
+      errorMessage: 'Ukuran file melebihi batas 10 MB.',
       format,
     }
   }

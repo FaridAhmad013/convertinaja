@@ -64,8 +64,8 @@ func NewJobService(store *storage.Storage, engine converter.Engine) *JobService 
 		jobs:    make(map[string]*JobRecord),
 	}
 
-	// Background ticker for 60-minute TTL cleanup
-	go svc.startRetentionWorker(10 * time.Minute)
+	// Background ticker for 10-minute TTL cleanup (swept every 2 minutes)
+	go svc.startRetentionWorker(2 * time.Minute)
 
 	return svc
 }
@@ -90,7 +90,7 @@ func (s *JobService) CreateJob(ctx context.Context, jobID, action string, inputP
 		Status:         StatusQueued,
 		InputFilePaths: inputPaths,
 		CreatedAt:      now,
-		ExpiresAt:      now.Add(60 * time.Minute),
+		ExpiresAt:      now.Add(10 * time.Minute),
 	}
 
 	s.mu.Lock()

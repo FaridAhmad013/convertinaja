@@ -149,7 +149,7 @@ export function App() {
     <I18nContext.Provider value={i18n}>
       <div className="min-h-screen flex flex-col bg-white">
         {/* 3.1 Navbar */}
-        <Navbar onSelectCategory={handleCategorySelect} />
+        <Navbar onSelectCategory={handleCategorySelect} onOpenLegal={handleOpenLegal} />
 
         <main className="flex-1 pb-16">
           {/* 3.2 Hero Section */}
