@@ -34,6 +34,14 @@ export type JobStatus =
   | 'completed'
   | 'failed'
 
+export interface ConvertedFileItem {
+  index: number
+  name: string
+  size: number
+  downloadUrl: string
+  previewUrl: string
+}
+
 export interface ConversionJobResult {
   jobId: string
   accessToken: string
@@ -41,6 +49,7 @@ export interface ConversionJobResult {
   action: string
   downloadUrl?: string
   batchDownloadUrl?: string
+  files?: ConvertedFileItem[]
   filesCount: number
   fileSize?: number
   expiresAt?: string

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -188,7 +189,7 @@ func (s *JobService) GetJob(jobID, token string) (*JobRecord, error) {
 	return record, nil
 }
 
-func (s *JobService) GetDownloadArtifact(jobID, token string, isBatch bool) (filePath string, mimeType string, filename string, err error) {
+func (s *JobService) GetDownloadArtifact(jobID, token string, isBatch bool, index int) (filePath string, mimeType string, filename string, err error) {
 	record, err := s.GetJob(jobID, token)
 	if err != nil {
 		return "", "", "", err
@@ -200,6 +201,11 @@ func (s *JobService) GetDownloadArtifact(jobID, token string, isBatch bool) (fil
 
 	if isBatch && record.BatchArchivePath != "" {
 		return record.BatchArchivePath, "application/zip", fmt.Sprintf("bundle-%s.zip", jobID[:8]), nil
+	}
+
+	if index >= 0 && index < len(record.ResultPaths) {
+		p := record.ResultPaths[index]
+		return p, record.MimeType, filepath.Base(p), nil
 	}
 
 	return record.PrimaryPath, record.MimeType, "converted_document", nil

@@ -165,7 +165,14 @@ export function useConversion() {
             action: res.action,
             downloadUrl: res.download_url || buildDownloadUrl(currentJobId, currentToken),
             batchDownloadUrl: res.batch_download_url,
-            filesCount: 1,
+            files: res.files?.map((f) => ({
+              index: f.index,
+              name: f.name,
+              size: f.size,
+              downloadUrl: f.download_url,
+              previewUrl: f.preview_url,
+            })),
+            filesCount: res.files ? res.files.length : 1,
             fileSize: res.file_size,
             expiresAt: res.expires_at,
           })

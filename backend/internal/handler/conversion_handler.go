@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -168,6 +170,30 @@ func (h *ConversionHandler) GetJobStatus(w http.ResponseWriter, r *http.Request)
 		}
 		resp["file_size"] = record.FileSize
 		resp["completed_at"] = record.CompletedAt
+
+		type FileItem struct {
+			Index       int    `json:"index"`
+			Name        string `json:"name"`
+			Size        int64  `json:"size"`
+			DownloadURL string `json:"download_url"`
+			PreviewURL  string `json:"preview_url"`
+		}
+
+		var files []FileItem
+		for i, p := range record.ResultPaths {
+			var sz int64
+			if info, statErr := os.Stat(p); statErr == nil {
+				sz = info.Size()
+			}
+			files = append(files, FileItem{
+				Index:       i,
+				Name:        filepath.Base(p),
+				Size:        sz,
+				DownloadURL: fmt.Sprintf("/api/v1/conversions/%s/download?token=%s&index=%d", record.ID, record.AccessToken, i),
+				PreviewURL:  fmt.Sprintf("/api/v1/conversions/%s/download?token=%s&index=%d&inline=1", record.ID, record.AccessToken, i),
+			})
+		}
+		resp["files"] = files
 	} else if record.Status == service.StatusFailed {
 		resp["error_message"] = record.ErrorMessage
 	}
@@ -180,13 +206,21 @@ func (h *ConversionHandler) DownloadArtifact(w http.ResponseWriter, r *http.Requ
 	jobID := chi.URLParam(r, "id")
 	token := extractToken(r)
 	isBatch := r.URL.Query().Get("batch") == "1"
+	isInline := r.URL.Query().Get("inline") == "1"
+
+	index := -1
+	if idxStr := r.URL.Query().Get("index"); idxStr != "" {
+		if parsedIdx, err := strconv.Atoi(idxStr); err == nil {
+			index = parsedIdx
+		}
+	}
 
 	if token == "" {
 		writeError(w, http.StatusUnauthorized, "Missing access token")
 		return
 	}
 
-	filePath, mimeType, filename, err := h.jobService.GetDownloadArtifact(jobID, token, isBatch)
+	filePath, mimeType, filename, err := h.jobService.GetDownloadArtifact(jobID, token, isBatch, index)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidToken) {
 			writeError(w, http.StatusUnauthorized, "Invalid job access token")
@@ -205,12 +239,17 @@ func (h *ConversionHandler) DownloadArtifact(w http.ResponseWriter, r *http.Requ
 	}
 
 	outFilename := filename
-	if !isBatch {
+	if !isBatch && index < 0 {
 		ext := filepath.Ext(filePath)
 		outFilename = fmt.Sprintf("converted-document%s", ext)
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, outFilename))
+	disposition := "attachment"
+	if isInline {
+		disposition = "inline"
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`%s; filename="%s"`, disposition, outFilename))
 	http.ServeFile(w, r, filePath)
 }
 

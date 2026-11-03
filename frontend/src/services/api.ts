@@ -10,6 +10,14 @@ export interface CreateJobResponse {
   created_at: string
 }
 
+export interface JobFileResponse {
+  index: number
+  name: string
+  size: number
+  download_url: string
+  preview_url: string
+}
+
 export interface JobStatusResponse {
   job_id: string
   status: JobStatus
@@ -17,6 +25,7 @@ export interface JobStatusResponse {
   download_url?: string
   batch_download_url?: string
   file_size?: number
+  files?: JobFileResponse[]
   error_message?: string
   created_at: string
   completed_at?: string
