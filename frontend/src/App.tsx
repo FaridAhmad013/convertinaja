@@ -8,20 +8,35 @@ import { ConversionStatus } from './components/ConversionStatus'
 import { ToolsCatalog } from './components/ToolsCatalog'
 import { HowItWorks } from './components/HowItWorks'
 import { Footer } from './components/Footer'
-import type { UploadedFile, ToolDefinition, ConversionJobResult } from './types/conversion'
+import { Toast } from './components/Toast'
+import type { UploadedFile, ToolDefinition } from './types/conversion'
 import { validateUploadedFile } from './services/toolsCatalog'
+import { useConversion } from './hooks/useConversion'
 
 export function App() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
-  const [currentJob, setCurrentJob] = useState<ConversionJobResult | null>(null)
   const [catalogCategory, setCatalogCategory] = useState<string>('all')
   const uploadSectionRef = useRef<HTMLDivElement>(null)
+
+  const {
+    job,
+    toasts,
+    startConversion,
+    resetJob,
+    addToast,
+    dismissToast,
+  } = useConversion()
 
   // Handle files added via Drag & Drop or File Picker
   const handleFilesAdded = (files: FileList | File[]) => {
     const fileArray = Array.from(files)
+    let invalidCount = 0
+
     const newItems: UploadedFile[] = fileArray.map((file) => {
       const validation = validateUploadedFile(file)
+      if (!validation.isValid) {
+        invalidCount += 1
+      }
       return {
         id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
         file,
@@ -32,6 +47,10 @@ export function App() {
         errorMessage: validation.errorMessage,
       }
     })
+
+    if (invalidCount > 0) {
+      addToast('error', `${invalidCount} file melebihi batas atau format tidak didukung.`)
+    }
 
     setUploadedFiles((prev) => [...prev, ...newItems])
   }
@@ -47,54 +66,24 @@ export function App() {
     inputEl?.click()
   }
 
-  // Start conversion handler
-  const handleStartConversion = (tool: ToolDefinition, _options: Record<string, unknown>) => {
-    const validFiles = uploadedFiles.filter((f) => f.isValid)
-    if (validFiles.length === 0) return
+  // Start conversion
+  const handleStartConversion = (tool: ToolDefinition, options: Record<string, unknown>) => {
+    const validRawFiles = uploadedFiles.filter((f) => f.isValid).map((f) => f.file)
+    if (validRawFiles.length === 0) {
+      addToast('error', 'Tidak ada file valid yang dapat dikonversi.')
+      return
+    }
 
-    // Initialize job state
-    const simulatedJobId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2)
-    const simulatedToken = Math.random().toString(36).substring(2, 10)
-
-    setCurrentJob({
-      jobId: simulatedJobId,
-      accessToken: simulatedToken,
-      status: 'uploading',
-      action: tool.name,
-      filesCount: validFiles.length,
-    })
-
-    // Simulate flow: uploading -> validating -> processing -> completed
-    setTimeout(() => {
-      setCurrentJob((prev) => (prev ? { ...prev, status: 'validating' } : null))
-    }, 800)
-
-    setTimeout(() => {
-      setCurrentJob((prev) => (prev ? { ...prev, status: 'processing' } : null))
-    }, 1800)
-
-    setTimeout(() => {
-      setCurrentJob((prev) =>
-        prev
-          ? {
-              ...prev,
-              status: 'completed',
-              downloadUrl: `#download-${simulatedJobId}`,
-              batchDownloadUrl: validFiles.length > 1 ? `#batch-${simulatedJobId}.zip` : undefined,
-              fileSize: 1024 * 350,
-            }
-          : null
-      )
-    }, 3800)
+    startConversion(validRawFiles, tool, options)
   }
 
   // Reset to upload another
   const handleReset = () => {
-    setCurrentJob(null)
+    resetJob()
     setUploadedFiles([])
   }
 
-  // Scroll to upload when clicking catalog or nav items
+  // Scroll to tools catalog
   const handleCategorySelect = (category: string) => {
     setCatalogCategory(category)
     const toolsEl = document.getElementById('tools')
@@ -116,15 +105,15 @@ export function App() {
           aria-label="Upload and Conversion Area"
           className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4"
         >
-          {/* If there is an active job or completed state */}
-          {currentJob ? (
-            <ConversionStatus job={currentJob} onReset={handleReset} />
+          {/* Active Job / Result View */}
+          {job ? (
+            <ConversionStatus job={job} onReset={handleReset} />
           ) : (
             <>
               {/* Dropzone Area */}
               <UploadZone
                 onFilesSelected={handleFilesAdded}
-                disabled={Boolean(currentJob)}
+                disabled={Boolean(job)}
               />
 
               {/* Uploaded File List */}
@@ -162,6 +151,9 @@ export function App() {
 
       {/* 3.6 Footer */}
       <Footer />
+
+      {/* Floating Feedback Toasts */}
+      <Toast toasts={toasts} onDismiss={dismissToast} />
     </div>
   )
 }
