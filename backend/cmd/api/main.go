@@ -3,14 +3,20 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/faridahmad013/convertinaja/internal/config"
+	"github.com/faridahmad013/convertinaja/internal/converter"
+	"github.com/faridahmad013/convertinaja/internal/handler"
+	"github.com/faridahmad013/convertinaja/internal/middleware"
+	"github.com/faridahmad013/convertinaja/internal/service"
+	"github.com/faridahmad013/convertinaja/internal/storage"
 )
 
 func main() {
@@ -18,38 +24,48 @@ func main() {
 
 	zerolog.TimeFieldFormat = time.RFC3339
 
-	port := os.Getenv("APP_PORT")
-	if port == "" {
-		port = "8080"
+	cfg := config.Load()
+
+	store, err := storage.New(cfg.StorageDir)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize storage")
 	}
+
+	engine := converter.NewPopplerEngine(cfg.PopplerBinDir, cfg.GhostscriptBin)
+	jobService := service.NewJobService(store, engine)
+	convHandler := handler.NewConversionHandler(store, jobService)
 
 	router := chi.NewRouter()
 
-	router.Use(middleware.RequestID)
-	router.Use(middleware.RealIP)
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.Timeout(60 * time.Second))
+	router.Use(chiMiddleware.RequestID)
+	router.Use(chiMiddleware.RealIP)
+	router.Use(chiMiddleware.Recoverer)
+	router.Use(middleware.CORS)
+	router.Use(chiMiddleware.Timeout(120 * time.Second))
 
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-
 		_ = json.NewEncoder(w).Encode(map[string]string{
 			"status":  "ok",
 			"service": "convertinaja-api",
 		})
 	})
 
+	convHandler.RegisterRoutes(router)
+
 	server := &http.Server{
-		Addr:         ":" + port,
+		Addr:         ":" + cfg.AppPort,
 		Handler:      router,
 		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 60 * time.Second,
+		WriteTimeout: 120 * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
 
 	log.Info().
-		Str("port", port).
-		Msg("ConvertinAja API is starting")
+		Str("port", cfg.AppPort).
+		Str("env", cfg.AppEnv).
+		Str("storage", cfg.StorageDir).
+		Msg("ConvertinAja API server is starting")
 
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal().Err(err).Msg("Failed to start server")

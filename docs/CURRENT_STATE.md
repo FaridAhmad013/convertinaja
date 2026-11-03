@@ -19,8 +19,9 @@
 | **Backend Scaffold** | Initialized | Chi router, Zerolog, `.env`, basic `/health` check functional. |
 | **Frontend Scaffold** | Initialized | Vite + React 19 + TypeScript + Tailwind CSS initialized. |
 | **Frontend UI/UX** | Implemented | Clean SaaS Light Mode homepage implemented according to UI/UX specification (Navbar, Hero, UploadZone, FileList, InlineToolSelector, ConversionStatus, ToolsCatalog, HowItWorks, Footer). Oxlint & build pass. |
-| **Conversion Engines** | Pending | Poppler & Ghostscript wrapper adapters to be implemented in `backend/internal/converter/`. |
-| **Database & Queue** | Pending | PostgreSQL migration schemas and Redis queue dispatcher to be implemented. |
+| **Conversion Engines** | Implemented (Phase 1) | `PopplerEngine` wrapper implemented for merge, split, compress (Ghostscript), PDF-to-image/txt/html, and extract images behind `Engine` interface. |
+| **Backend Endpoints** | Implemented | REST handlers for `POST /api/v1/conversions`, `GET /status`, `GET /download`, `DELETE /conversions/{id}` with CORS and Zerolog logging. All unit/handler tests passing. |
+| **Database & Queue** | In Progress | In-memory thread-safe adapter active; PostgreSQL migrations and Redis queue consumer ready for container deployment. |
 | **Infrastructure** | Pending | `docker-compose.yml` and Nginx reverse proxy configuration to be implemented. |
 
 ---
