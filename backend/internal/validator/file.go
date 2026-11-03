@@ -89,7 +89,9 @@ func ValidateFileHeader(r io.Reader, reportedSize int64, expectedAction string) 
 		strings.HasPrefix(expectedAction, "split") ||
 		strings.HasPrefix(expectedAction, "compress") ||
 		strings.HasPrefix(expectedAction, "pdf_to") ||
-		strings.HasPrefix(expectedAction, "extract_") {
+		strings.HasPrefix(expectedAction, "pdf-to") ||
+		strings.HasPrefix(expectedAction, "extract_") ||
+		strings.HasPrefix(expectedAction, "extract-") {
 		if detected != FileTypePDF {
 			return detected, nil, errors.New("action requires valid PDF document")
 		}

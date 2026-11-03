@@ -1,13 +1,12 @@
 import { useState } from 'react'
-import { FileCode2, Menu, X, Globe, History } from 'lucide-react'
+import { FileCode2, Menu, X, Globe, ShieldCheck } from 'lucide-react'
 import { useI18n } from '../i18n'
 
 interface NavbarProps {
-  onOpenHistory: () => void
   onSelectCategory?: (category: string) => void
 }
 
-export function Navbar({ onOpenHistory }: NavbarProps) {
+export function Navbar({ onSelectCategory: _onSelectCategory }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { lang, setLang, t } = useI18n()
 
@@ -53,15 +52,11 @@ export function Navbar({ onOpenHistory }: NavbarProps) {
             {t.nav.howItWorks}
           </button>
 
-          {/* Local History Trigger */}
-          <button
-            type="button"
-            onClick={onOpenHistory}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#64748B] hover:text-[#2563EB] transition-colors cursor-pointer"
-          >
-            <History className="w-4 h-4" />
-            <span>{t.nav.history}</span>
-          </button>
+          {/* Zero-Storage Assurance Pill */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{t.nav.zeroStorageBadge}</span>
+          </div>
 
           {/* Language Toggle */}
           <button
@@ -113,17 +108,10 @@ export function Navbar({ onOpenHistory }: NavbarProps) {
           >
             {t.nav.howItWorks}
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMobileMenuOpen(false)
-              onOpenHistory()
-            }}
-            className="w-full text-left py-2 text-sm font-medium text-[#2563EB] flex items-center gap-2"
-          >
-            <History className="w-4 h-4" />
-            <span>{t.nav.history}</span>
-          </button>
+          <div className="py-2 flex items-center gap-1.5 text-xs text-emerald-700 font-semibold">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>{t.nav.zeroStorageBadge}</span>
+          </div>
         </div>
       )}
     </header>

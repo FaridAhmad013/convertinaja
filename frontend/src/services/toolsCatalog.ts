@@ -71,6 +71,16 @@ export const AVAILABLE_TOOLS: ToolDefinition[] = [
     outputFormat: 'TXT',
   },
   {
+    id: 'pdf-to-md',
+    name: 'PDF to Markdown',
+    category: 'pdf',
+    description: 'Konversi dan ekstrak isi dokumen PDF ke format Markdown (.md).',
+    allowedFormats: ['pdf'],
+    minFiles: 1,
+    maxFiles: 5,
+    outputFormat: 'MD',
+  },
+  {
     id: 'pdf-to-html',
     name: 'PDF to HTML',
     category: 'pdf',

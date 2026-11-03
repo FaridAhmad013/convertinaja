@@ -141,6 +141,11 @@ func (s *JobService) processJob(jobID, action string, inputPaths []string, optio
 		return
 	}
 
+	// Immediate Zero-Storage: destroy original raw uploaded source files right away
+	for _, p := range inputPaths {
+		_ = os.Remove(p)
+	}
+
 	record.Status = StatusCompleted
 	record.CompletedAt = &now
 	record.ResultPaths = result.OutputPaths

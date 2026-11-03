@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
@@ -55,6 +56,8 @@ func (p *PopplerEngine) Execute(ctx context.Context, req ConversionJobRequest) (
 		return p.pdfToImage(ctx, req, "png", "image/png", ".png")
 	case "pdf-to-txt":
 		return p.pdfToText(ctx, req)
+	case "pdf-to-md", "pdf-to-markdown":
+		return p.pdfToMarkdown(ctx, req)
 	case "pdf-to-html":
 		return p.pdfToHtml(ctx, req)
 	case "extract-pdf-images", "extract-images":
@@ -263,6 +266,44 @@ func (p *PopplerEngine) pdfToText(ctx context.Context, req ConversionJobRequest)
 		OutputPaths: []string{outPath},
 		PrimaryPath: outPath,
 		MimeType:    "text/plain; charset=utf-8",
+		IsArchive:   false,
+	}, nil
+}
+
+// 5b. PDF to Markdown (.md)
+func (p *PopplerEngine) pdfToMarkdown(ctx context.Context, req ConversionJobRequest) (*ConversionResult, error) {
+	inPath := req.InputPaths[0]
+	tempTxt := filepath.Join(req.OutputDir, "temp_extracted.txt")
+	outPath := filepath.Join(req.OutputDir, "document.md")
+
+	args := []string{"-layout", inPath, tempTxt}
+	bin := p.resolveBinary("pdftotext")
+	if err := p.executeCommand(ctx, req.OutputDir, bin, args...); err != nil {
+		return nil, err
+	}
+	defer os.Remove(tempTxt)
+
+	raw, err := os.ReadFile(tempTxt)
+	if err != nil {
+		return nil, err
+	}
+
+	// Format text lines cleanly into Markdown document
+	lines := strings.Split(string(raw), "\n")
+	var mdLines []string
+	for _, l := range lines {
+		trimmed := strings.TrimRight(l, " \t\r")
+		mdLines = append(mdLines, trimmed)
+	}
+	content := strings.Join(mdLines, "\n")
+	if err := os.WriteFile(outPath, []byte(content), 0644); err != nil {
+		return nil, err
+	}
+
+	return &ConversionResult{
+		OutputPaths: []string{outPath},
+		PrimaryPath: outPath,
+		MimeType:    "text/markdown; charset=utf-8",
 		IsArchive:   false,
 	}, nil
 }

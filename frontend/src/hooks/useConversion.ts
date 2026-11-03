@@ -26,6 +26,7 @@ export function useConversion() {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
   const pollAttempts = useRef(0)
   const pollTimeoutRef = useRef<number | null>(null)
+  const pollingJobIdRef = useRef<string | null>(null)
   const pollJobStatusRef = useRef<(jobId: string, token: string) => Promise<void>>(async () => {})
 
   // Sync active job to sessionStorage
@@ -106,6 +107,7 @@ export function useConversion() {
         const res = await getJobStatus(jobId, token)
 
         if (res.status === 'completed') {
+          pollingJobIdRef.current = null
           updateJobState({
             jobId,
             accessToken: token,
@@ -122,6 +124,7 @@ export function useConversion() {
         }
 
         if (res.status === 'failed') {
+          pollingJobIdRef.current = null
           updateJobState({
             jobId,
             accessToken: token,
@@ -200,6 +203,7 @@ export function useConversion() {
         })
 
         // Begin polling
+        pollingJobIdRef.current = created.job_id
         pollJobStatusRef.current(created.job_id, created.access_token)
       } catch (err) {
         // Fallback for development if backend API server is not running yet
@@ -226,7 +230,8 @@ export function useConversion() {
 
   const resetJob = useCallback(() => {
     if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
-    if (job?.jobId && job.accessToken && job.status === 'processing') {
+    pollingJobIdRef.current = null
+    if (job?.jobId && job.accessToken) {
       cancelConversionJob(job.jobId, job.accessToken).catch(() => {})
     }
     updateJobState(null)
@@ -234,7 +239,13 @@ export function useConversion() {
 
   // Resume polling on refresh if active job was processing
   useEffect(() => {
-    if (job?.jobId && job.accessToken && ['queued', 'processing'].includes(job.status)) {
+    if (
+      job?.jobId &&
+      job.accessToken &&
+      ['queued', 'processing'].includes(job.status) &&
+      pollingJobIdRef.current !== job.jobId
+    ) {
+      pollingJobIdRef.current = job.jobId
       pollJobStatusRef.current(job.jobId, job.accessToken)
     }
 

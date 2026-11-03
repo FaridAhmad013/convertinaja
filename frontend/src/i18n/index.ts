@@ -6,13 +6,15 @@ export interface Translations {
   nav: {
     tools: string
     howItWorks: string
-    history: string
     changeLang: string
+    zeroStorageBadge: string
   }
   hero: {
     badge: string
     title: string
     subtitle: string
+    freeBadge: string
+    supportCreator: string
   }
   upload: {
     dropTitle: string
@@ -83,14 +85,6 @@ export interface Translations {
     purgedSuccess: string
     convertAgain: string
   }
-  history: {
-    title: string
-    subtitle: string
-    empty: string
-    clearAll: string
-    download: string
-    expired: string
-  }
   catalog: {
     title: string
     subtitle: string
@@ -122,20 +116,22 @@ export const translations: Record<Language, Translations> = {
     nav: {
       tools: 'Peralatan',
       howItWorks: 'Cara Kerja',
-      history: 'Riwayat Konversi',
       changeLang: 'Ganti Bahasa',
+      zeroStorageBadge: '100% Bebas Jejak (Zero-Storage)',
     },
     hero: {
       badge: 'KONVERSI BERKAS PRAKTIS',
       title: 'Ubah berkas Anda. Cepat dan bebas ribet.',
       subtitle: 'Semua alat konversi dokumen, gambar, dan PDF dalam satu tempat. 100% gratis tanpa perlu daftar akun.',
+      freeBadge: 'Convert for completely free with no paywall',
+      supportCreator: 'click on the ads to help the creator',
     },
     upload: {
       dropTitle: 'Tarik & letakkan berkas Anda ke sini',
       dropSubtitle: 'atau klik untuk memilih dari perangkat',
       chooseButton: 'Pilih Berkas',
       maxLimits: 'Mendukung PDF, JPG, PNG, WEBP, DOCX, XLSX, PPTX hingga 50 MB',
-      privacyNotice: 'Privasi Terjamin: Berkas diproses di memori sementara dan dihapus permanen dalam 60 menit.',
+      privacyNotice: 'Privasi Terjamin: Berkas sumber Anda dimusnahkan seketika setelah pemrosesan selesai.',
     },
     popular: {
       title: 'Peralatan Populer',
@@ -177,7 +173,7 @@ export const translations: Record<Language, Translations> = {
       compHighSub: 'Ukuran paling kecil (72 DPI)',
       pageRangeLabel: 'Rentang Halaman (contoh: "1-5", "1,3,7", atau "all"):',
       pageRangePlaceholder: 'all',
-      privacyText: (n) => `${n} berkas dipilih • Dihapus permanen dalam 60 menit`,
+      privacyText: (n) => `${n} berkas dipilih • Zero-Storage (Dimusnahkan Langsung)`,
       convertButton: 'Mulai Konversi Sekarang',
       processingButton: 'Sedang Mengonversi...',
       unsupportedComb: 'Kombinasi Berkas Belum Didukung',
@@ -190,22 +186,14 @@ export const translations: Record<Language, Translations> = {
       processing: 'Sedang memproses dengan kualitas tinggi...',
       completed: 'Konversi Berhasil Selesai!',
       failed: 'Konversi Gagal',
-      completedSub: 'Berkas Anda selesai diproses dengan kualitas terbaik dan siap diunduh.',
+      completedSub: 'Dokumen Anda selesai diproses. Berkas sumber langsung dimusnahkan dari server demi privasi Anda.',
       processingSub: 'Mohon tunggu sejenak, sistem sedang menjalankan operasi konversi.',
       downloadButton: 'Unduh Hasil Konversi',
       downloadZipButton: 'Unduh Semua (.zip)',
-      retentionNotice: 'Berkas akan otomatis dihapus permanen oleh sistem dalam 60 menit.',
+      retentionNotice: 'Berkas sumber telah dihapus. Hasil konversi dapat dimusnahkan kapan saja.',
       purgeNow: 'Hapus dari Server Sekarang',
-      purgedSuccess: 'Berkas berhasil dihapus permanen dari server!',
+      purgedSuccess: 'Berkas telah berhasil dimusnahkan permanen dari server!',
       convertAgain: 'Konversi Dokumen Lain',
-    },
-    history: {
-      title: 'Riwayat Konversi Lokal',
-      subtitle: 'Tersimpan hanya di perangkat/browser Anda untuk privasi total. Tidak pernah dikirim ke database publik.',
-      empty: 'Belum ada riwayat konversi di browser ini.',
-      clearAll: 'Bersihkan Riwayat Lokal',
-      download: 'Unduh',
-      expired: 'Kedaluwarsa',
     },
     catalog: {
       title: 'Jelajahi Beragam Peralatan Konversi',
@@ -223,12 +211,12 @@ export const translations: Record<Language, Translations> = {
       step1Desc: 'Pilih atau seret berkas Anda ke zona unggah. Sistem otomatis mengenali format dan batas ukuran.',
       step2Title: '2. Sesuaikan Pengaturan',
       step2Desc: 'Pilih operasi konversi dan opsi kualitas (HD 300 DPI default).',
-      step3Title: '3. Unduh & Aman',
-      step3Desc: 'Unduh langsung hasilnya. Berkas otomatis terhapus permanen dalam 60 menit atau hapus langsung seketika.',
+      step3Title: '3. Unduh & Langsung Bersih',
+      step3Desc: 'Unduh langsung hasilnya. Berkas sumber langsung dimusnahkan otomatis demi privasi.',
     },
     footer: {
       tagline: 'Platform konversi dokumen gratis, open-source, dan mengutamakan privasi Anda.',
-      privacyGuaranteed: 'Zero-Tracking • Hapus Otomatis 60 Menit • Tanpa Akun',
+      privacyGuaranteed: 'Zero-Storage: Kami tidak pernah menyimpan dokumen Anda di server.',
       openSource: 'Proyek Open-Source',
     },
   },
@@ -236,20 +224,22 @@ export const translations: Record<Language, Translations> = {
     nav: {
       tools: 'Tools',
       howItWorks: 'How it works',
-      history: 'Recent History',
       changeLang: 'Change Language',
+      zeroStorageBadge: '100% Zero-Storage Guaranteed',
     },
     hero: {
       badge: 'SIMPLE FILE CONVERSION',
       title: 'Convert your files. Simply and quickly.',
       subtitle: 'All your document, image, and PDF conversion tools in one place. 100% free with no account required.',
+      freeBadge: 'Convert for completely free with no paywall',
+      supportCreator: 'click on the ads to help the creator',
     },
     upload: {
       dropTitle: 'Drop your files here',
       dropSubtitle: 'or click to browse from device',
       chooseButton: 'Choose Files',
       maxLimits: 'Supports PDF, JPG, PNG, WEBP, DOCX, XLSX, PPTX up to 50 MB',
-      privacyNotice: 'Privacy Guaranteed: Files are processed in ephemeral storage and auto-deleted in 60 minutes.',
+      privacyNotice: 'Zero-Storage: Your source files are permanently destroyed right after conversion.',
     },
     popular: {
       title: 'Popular tools',
@@ -291,7 +281,7 @@ export const translations: Record<Language, Translations> = {
       compHighSub: 'Smallest file size (72 DPI)',
       pageRangeLabel: 'Page Range (e.g. "1-5", "1,3,7", or "all"):',
       pageRangePlaceholder: 'all',
-      privacyText: (n) => `${n} files selected • Permanently purged after 60 min`,
+      privacyText: (n) => `${n} files selected • Zero-Storage (Instant Destruction)`,
       convertButton: 'Convert Now',
       processingButton: 'Converting...',
       unsupportedComb: 'Unsupported File Combination',
@@ -304,22 +294,14 @@ export const translations: Record<Language, Translations> = {
       processing: 'Converting with high fidelity...',
       completed: 'Conversion Completed!',
       failed: 'Conversion Failed',
-      completedSub: 'Your document was processed with maximum quality and is ready for download.',
+      completedSub: 'Your document was processed with maximum quality. Source files were destroyed immediately.',
       processingSub: 'Please wait a moment while the conversion engine finishes.',
       downloadButton: 'Download Converted File',
       downloadZipButton: 'Download All (.zip)',
-      retentionNotice: 'Files are automatically deleted from server memory within 60 minutes.',
+      retentionNotice: 'Source files have been destroyed. Result can be purged anytime.',
       purgeNow: 'Delete from Server Now',
-      purgedSuccess: 'File permanently deleted from server!',
+      purgedSuccess: 'Files permanently destroyed from server!',
       convertAgain: 'Convert Another File',
-    },
-    history: {
-      title: 'Local Conversion History',
-      subtitle: 'Stored exclusively in your local browser for maximum privacy. Never sent to an external server.',
-      empty: 'No conversion history on this device yet.',
-      clearAll: 'Clear Local History',
-      download: 'Download',
-      expired: 'Expired',
     },
     catalog: {
       title: 'Explore All Conversion Tools',
@@ -337,12 +319,12 @@ export const translations: Record<Language, Translations> = {
       step1Desc: 'Drop your files into the upload area. Format and size constraints are verified instantly.',
       step2Title: '2. Configure & Options',
       step2Desc: 'Select your target tool and quality resolution (300 DPI HD default).',
-      step3Title: '3. Download & Secure',
-      step3Desc: 'Download the result immediately. Files are permanently wiped after 60 minutes or on demand.',
+      step3Title: '3. Download & Instant Purge',
+      step3Desc: 'Download your result immediately. Source files are destroyed instantly for total privacy.',
     },
     footer: {
       tagline: 'An open-source, privacy-focused document conversion platform.',
-      privacyGuaranteed: 'Zero Tracking • 60-Min Auto Delete • No Accounts',
+      privacyGuaranteed: 'Zero-Storage: We never store your documents on our servers.',
       openSource: 'Open-Source Project',
     },
   },

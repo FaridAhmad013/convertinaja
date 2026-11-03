@@ -10,11 +10,9 @@ import { ToolsCatalog } from './components/ToolsCatalog'
 import { HowItWorks } from './components/HowItWorks'
 import { Footer } from './components/Footer'
 import { Toast } from './components/Toast'
-import { LocalHistoryModal } from './components/LocalHistoryModal'
 import type { UploadedFile, ToolDefinition } from './types/conversion'
 import { validateUploadedFile } from './services/toolsCatalog'
 import { useConversion } from './hooks/useConversion'
-import { useLocalHistory } from './hooks/useLocalHistory'
 import { I18nContext, useI18nState } from './i18n'
 
 export function App() {
@@ -23,7 +21,6 @@ export function App() {
   const [catalogCategory, setCatalogCategory] = useState<string>('all')
   const [preferredToolId, setPreferredToolId] = useState<string | null>(null)
   const [filePickerAccept, setFilePickerAccept] = useState<string | undefined>(undefined)
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
   const uploadSectionRef = useRef<HTMLDivElement>(null)
   const toolSelectorRef = useRef<HTMLDivElement>(null)
@@ -38,8 +35,6 @@ export function App() {
     dismissToast,
   } = useConversion()
 
-  const { history, addHistoryItem, clearHistory } = useLocalHistory()
-
   // Auto-scroll to conversion progress status when job changes
   useEffect(() => {
     if (job) {
@@ -48,22 +43,6 @@ export function App() {
       }, 50)
     }
   }, [job])
-
-  // Save completed job to browser local history
-  useEffect(() => {
-    if (job && job.status === 'completed' && job.downloadUrl) {
-      addHistoryItem({
-        jobId: job.jobId,
-        accessToken: job.accessToken,
-        action: job.action,
-        filename: uploadedFiles[0]?.name || job.action,
-        fileSize: job.fileSize,
-        createdAt: new Date().toISOString(),
-        expiresAt: job.expiresAt || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-        downloadUrl: job.downloadUrl,
-      })
-    }
-  }, [job, uploadedFiles, addHistoryItem])
 
   // Handle files added via Drag & Drop or File Picker
   const handleFilesAdded = (files: FileList | File[]) => {
@@ -145,7 +124,7 @@ export function App() {
     setFilePickerAccept(undefined)
     setTimeout(() => {
       uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 100)
+    }, 50)
   }
 
   // Scroll to tools catalog
@@ -159,10 +138,7 @@ export function App() {
     <I18nContext.Provider value={i18n}>
       <div className="min-h-screen flex flex-col bg-white">
         {/* 3.1 Navbar */}
-        <Navbar
-          onOpenHistory={() => setIsHistoryOpen(true)}
-          onSelectCategory={handleCategorySelect}
-        />
+        <Navbar onSelectCategory={handleCategorySelect} />
 
         <main className="flex-1 pb-16">
           {/* 3.2 Hero Section */}
@@ -234,14 +210,6 @@ export function App() {
 
         {/* 3.6 Footer */}
         <Footer />
-
-        {/* Local History Modal */}
-        <LocalHistoryModal
-          isOpen={isHistoryOpen}
-          onClose={() => setIsHistoryOpen(false)}
-          history={history}
-          onClearHistory={clearHistory}
-        />
 
         {/* Floating Feedback Toasts */}
         <Toast toasts={toasts} onDismiss={dismissToast} />
