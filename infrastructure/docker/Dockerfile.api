@@ -20,7 +20,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /out/api ./cmd/api
 # ==========================================
 FROM debian:bookworm-slim AS runner
 
-# Install Poppler utilities, Ghostscript & LibreOffice headless for document conversions
+# Install Poppler utilities, Ghostscript, LibreOffice headless & WebP tools for conversions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     tzdata \
@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libreoffice-nogui \
     fonts-dejavu \
     fonts-liberation \
+    webp \
     curl \
     && rm -rf /var/lib/apt/lists/*
 

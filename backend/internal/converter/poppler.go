@@ -69,6 +69,12 @@ func (p *PopplerEngine) Execute(ctx context.Context, req ConversionJobRequest) (
 		return p.convertImageFormats(req, "png", "image/png", ".png")
 	case "png-to-jpg", "png-to-jpeg":
 		return p.convertImageFormats(req, "jpeg", "image/jpeg", ".jpg")
+	case "image-to-webp", "img-to-webp", "jpg-to-webp", "png-to-webp":
+		return p.imageToWebP(ctx, req)
+	case "webp-to-jpg", "webp-to-jpeg":
+		return p.webpToFormat(ctx, req, "jpeg", "image/jpeg", ".jpg")
+	case "webp-to-png":
+		return p.webpToFormat(ctx, req, "png", "image/png", ".png")
 	case "jpg-to-pdf", "png-to-pdf", "image-to-pdf":
 		return p.imagesToPDF(ctx, req)
 	case "docx-to-pdf", "pptx-to-pdf", "xlsx-to-pdf", "odt-to-pdf", "doc-to-pdf", "ppt-to-pdf", "xls-to-pdf", "txt-to-pdf":
@@ -507,6 +513,107 @@ func (p *PopplerEngine) officeToPDF(ctx context.Context, req ConversionJobReques
 		OutputPaths: outputs,
 		PrimaryPath: outputs[0],
 		MimeType:    "application/pdf",
+		IsArchive:   len(outputs) > 1,
+	}, nil
+}
+
+// 11. Image to WebP (via Google cwebp CLI)
+func (p *PopplerEngine) imageToWebP(ctx context.Context, req ConversionJobRequest) (*ConversionResult, error) {
+	var outputs []string
+	cwebpBin := "cwebp"
+
+	quality := 85
+	if req.Options != nil {
+		if q, ok := req.Options["quality"].(int); ok && q > 0 {
+			quality = q
+		}
+	}
+
+	for i, inPath := range req.InputPaths {
+		baseName := strings.TrimSuffix(filepath.Base(inPath), filepath.Ext(inPath))
+		outFileName := fmt.Sprintf("%s.webp", baseName)
+		if len(req.InputPaths) > 1 {
+			outFileName = fmt.Sprintf("converted_%d_%s.webp", i+1, baseName)
+		}
+		outPath := filepath.Join(req.OutputDir, outFileName)
+
+		args := []string{
+			"-q", strconv.Itoa(quality),
+			inPath,
+			"-o", outPath,
+		}
+
+		if err := p.executeCommand(ctx, req.OutputDir, cwebpBin, args...); err != nil {
+			return nil, err
+		}
+
+		outputs = append(outputs, outPath)
+	}
+
+	return &ConversionResult{
+		OutputPaths: outputs,
+		PrimaryPath: outputs[0],
+		MimeType:    "image/webp",
+		IsArchive:   len(outputs) > 1,
+	}, nil
+}
+
+// 12. WebP to JPG / PNG (via Google dwebp CLI)
+func (p *PopplerEngine) webpToFormat(ctx context.Context, req ConversionJobRequest, format, mimeType, ext string) (*ConversionResult, error) {
+	var outputs []string
+	dwebpBin := "dwebp"
+
+	for i, inPath := range req.InputPaths {
+		baseName := strings.TrimSuffix(filepath.Base(inPath), filepath.Ext(inPath))
+		outFileName := fmt.Sprintf("%s%s", baseName, ext)
+		if len(req.InputPaths) > 1 {
+			outFileName = fmt.Sprintf("converted_%d_%s%s", i+1, baseName, ext)
+		}
+		outPath := filepath.Join(req.OutputDir, outFileName)
+
+		if format == "png" {
+			args := []string{inPath, "-o", outPath}
+			if err := p.executeCommand(ctx, req.OutputDir, dwebpBin, args...); err != nil {
+				return nil, err
+			}
+			outputs = append(outputs, outPath)
+			continue
+		}
+
+		// Convert WebP -> temp PNG -> JPEG via Go stdlib
+		tempPNG := filepath.Join(req.OutputDir, fmt.Sprintf("temp_%d.png", i))
+		if err := p.executeCommand(ctx, req.OutputDir, dwebpBin, inPath, "-o", tempPNG); err != nil {
+			return nil, err
+		}
+		defer os.Remove(tempPNG)
+
+		pngFile, err := os.Open(tempPNG)
+		if err != nil {
+			return nil, err
+		}
+		img, _, err := image.Decode(pngFile)
+		pngFile.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		outFile, err := os.Create(outPath)
+		if err != nil {
+			return nil, err
+		}
+		err = jpeg.Encode(outFile, img, &jpeg.Options{Quality: 95})
+		outFile.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		outputs = append(outputs, outPath)
+	}
+
+	return &ConversionResult{
+		OutputPaths: outputs,
+		PrimaryPath: outputs[0],
+		MimeType:    mimeType,
 		IsArchive:   len(outputs) > 1,
 	}, nil
 }

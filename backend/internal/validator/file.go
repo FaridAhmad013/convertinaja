@@ -126,7 +126,7 @@ func ValidateFileHeader(r io.Reader, reportedSize int64, expectedAction string) 
 		if detected != FileTypeJPEG && detected != FileTypePNG && detected != FileTypeWebP {
 			return detected, nil, errors.New("aksi ini membutuhkan berkas gambar (JPG, PNG, atau WebP)")
 		}
-	case normAction == "webp-to-jpg" || normAction == "webp-to-png":
+	case normAction == "webp-to-jpg" || normAction == "webp-to-jpeg" || normAction == "webp-to-png":
 		if detected != FileTypeWebP {
 			return detected, nil, errors.New("aksi ini membutuhkan gambar berformat WebP")
 		}
