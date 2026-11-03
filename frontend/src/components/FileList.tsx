@@ -1,5 +1,6 @@
 import { Trash2, AlertCircle, CheckCircle2, FileText, Image as ImageIcon, FileSpreadsheet, Plus } from 'lucide-react'
 import type { UploadedFile } from '../types/conversion'
+import { useI18n } from '../i18n'
 
 interface FileListProps {
   files: UploadedFile[]
@@ -30,6 +31,7 @@ function getFileIcon(format: string) {
 }
 
 export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: FileListProps) {
+  const { t } = useI18n()
   const validCount = files.filter((f) => f.isValid).length
   const totalCount = files.length
 
@@ -39,10 +41,10 @@ export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: File
       <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] mb-3">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-sm sm:text-base text-[#0F172A]">
-            Daftar Berkas Terunggah
+            {t.files.title}
           </span>
           <span className="text-xs px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#64748B] font-medium">
-            {validCount} dari {totalCount} valid
+            {t.files.validBadge(validCount, totalCount)}
           </span>
         </div>
 
@@ -53,7 +55,7 @@ export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: File
           className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#EFF6FF] px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Tambah File</span>
+          <span>{t.files.addMore}</span>
         </button>
       </div>
 
@@ -84,7 +86,7 @@ export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: File
                   </span>
                   {f.isValid ? (
                     <span className="inline-flex items-center gap-1 text-[#16A34A] text-xs font-medium ml-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Siap
+                      <CheckCircle2 className="w-3.5 h-3.5" /> {t.files.ready}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-[#DC2626] text-xs font-medium ml-1 truncate">
@@ -100,7 +102,7 @@ export function FileList({ files, onRemoveFile, onAddMoreClick, disabled }: File
               onClick={() => onRemoveFile(f.id)}
               disabled={disabled}
               className="p-1.5 text-[#64748B] hover:text-[#DC2626] hover:bg-red-50 rounded-lg transition-colors cursor-pointer shrink-0"
-              title="Hapus berkas ini"
+              title={t.files.remove}
               aria-label={`Hapus ${f.name}`}
             >
               <Trash2 className="w-4 h-4" />

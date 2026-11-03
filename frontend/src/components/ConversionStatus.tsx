@@ -1,5 +1,8 @@
-import { CheckCircle2, AlertCircle, Download, FileArchive, RefreshCw, Clock } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle2, AlertCircle, Download, FileArchive, RefreshCw, Clock, Trash2, ShieldCheck } from 'lucide-react'
 import type { ConversionJobResult } from '../types/conversion'
+import { cancelConversionJob } from '../services/api'
+import { useI18n } from '../i18n'
 
 interface ConversionStatusProps {
   job: ConversionJobResult
@@ -7,6 +10,10 @@ interface ConversionStatusProps {
 }
 
 export function ConversionStatus({ job, onReset }: ConversionStatusProps) {
+  const { t } = useI18n()
+  const [isPurging, setIsPurging] = useState(false)
+  const [isPurged, setIsPurged] = useState(false)
+
   const isCompleted = job.status === 'completed'
   const isFailed = job.status === 'failed'
   const isProcessing = ['uploading', 'validating', 'queued', 'processing'].includes(job.status)
@@ -14,19 +21,32 @@ export function ConversionStatus({ job, onReset }: ConversionStatusProps) {
   const getStatusText = () => {
     switch (job.status) {
       case 'uploading':
-        return 'Mengunggah file ke server...'
+        return t.status.uploading
       case 'validating':
-        return 'Memeriksa validitas dan keamanan file...'
+        return t.status.validating
       case 'queued':
-        return 'Masuk dalam antrean pemrosesan...'
+        return t.status.queued
       case 'processing':
-        return 'Sedang memproses dan mengonversi...'
+        return t.status.processing
       case 'completed':
-        return 'Konversi Berhasil Selesai!'
+        return t.status.completed
       case 'failed':
-        return 'Konversi Gagal'
+        return t.status.failed
       default:
-        return 'Menyiapkan proses...'
+        return t.status.processing
+    }
+  }
+
+  const handlePurgeNow = async () => {
+    if (!job.jobId || !job.accessToken) return
+    setIsPurging(true)
+    try {
+      await cancelConversionJob(job.jobId, job.accessToken)
+      setIsPurged(true)
+    } catch (err) {
+      console.error('Failed to purge job immediately:', err)
+    } finally {
+      setIsPurging(false)
     }
   }
 
@@ -58,17 +78,17 @@ export function ConversionStatus({ job, onReset }: ConversionStatusProps) {
         </h3>
         {isCompleted && (
           <p className="text-sm text-[#64748B]">
-            Dokumen Anda telah berhasil diproses dengan kualitas terbaik dan siap diunduh.
+            {t.status.completedSub}
           </p>
         )}
         {isFailed && (
           <p className="text-sm text-[#DC2626]">
-            {job.errorMessage || 'Terjadi kesalahan saat memproses file. Silakan coba kembali.'}
+            {job.errorMessage || 'Terjadi kesalahan saat memproses file.'}
           </p>
         )}
         {isProcessing && (
           <p className="text-sm text-[#64748B]">
-            Mohon tunggu sejenak, sistem sedang menjalankan operasi konversi dengan resolusi tinggi.
+            {t.status.processingSub}
           </p>
         )}
       </div>
@@ -82,38 +102,59 @@ export function ConversionStatus({ job, onReset }: ConversionStatusProps) {
 
       {/* Download Action Buttons (when completed) */}
       {isCompleted && (
-        <div className="space-y-3 pt-2">
-          {/* Main Direct Download */}
-          {job.downloadUrl && (
-            <a
-              href={job.downloadUrl}
-              download
-              className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-sm shadow-xs transition-all"
-            >
-              <Download className="w-4 h-4" />
-              <span>Unduh Hasil Konversi</span>
-            </a>
-          )}
+        <div className="space-y-4 pt-2">
+          {!isPurged ? (
+            <>
+              {/* Main Direct Download */}
+              {job.downloadUrl && (
+                <a
+                  href={job.downloadUrl}
+                  download
+                  className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-sm shadow-xs transition-all"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>{t.status.downloadButton}</span>
+                </a>
+              )}
 
-          {/* Batch ZIP Download button */}
-          {job.batchDownloadUrl && (
-            <div>
-              <a
-                href={job.batchDownloadUrl}
-                download
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-lg border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] text-[#0F172A] font-medium text-xs transition-colors mt-2"
-              >
-                <FileArchive className="w-4 h-4 text-[#2563EB]" />
-                <span>Unduh Semua sebagai ZIP (.zip)</span>
-              </a>
+              {/* Batch ZIP Download button */}
+              {job.batchDownloadUrl && (
+                <div>
+                  <a
+                    href={job.batchDownloadUrl}
+                    download
+                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 rounded-lg border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] text-[#0F172A] font-medium text-xs transition-colors mt-2"
+                  >
+                    <FileArchive className="w-4 h-4 text-[#2563EB]" />
+                    <span>{t.status.downloadZipButton}</span>
+                  </a>
+                </div>
+              )}
+
+              {/* Privacy Retention Notice & Immediate Hard Purge Button */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 text-xs text-[#64748B]">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-amber-500" />
+                  <span>{t.status.retentionNotice}</span>
+                </div>
+                <span className="hidden sm:inline">•</span>
+                <button
+                  type="button"
+                  onClick={handlePurgeNow}
+                  disabled={isPurging}
+                  className="inline-flex items-center gap-1 text-[#DC2626] hover:underline font-medium cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{isPurging ? 'Menghapus...' : t.status.purgeNow}</span>
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-medium flex items-center justify-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>{t.status.purgedSuccess}</span>
             </div>
           )}
-
-          {/* Privacy Retention Notice */}
-          <div className="flex items-center justify-center gap-1.5 text-xs text-[#64748B] pt-2">
-            <Clock className="w-3.5 h-3.5 text-amber-500" />
-            <span>Berkas otomatis dihapus permanen dalam 60 menit.</span>
-          </div>
         </div>
       )}
 
@@ -126,7 +167,7 @@ export function ConversionStatus({ job, onReset }: ConversionStatusProps) {
             className="inline-flex items-center gap-2 text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8] cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" />
-            <span>Konversi Dokumen Lain</span>
+            <span>{t.status.convertAgain}</span>
           </button>
         </div>
       )}

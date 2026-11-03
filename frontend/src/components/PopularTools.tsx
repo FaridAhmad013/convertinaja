@@ -1,35 +1,46 @@
 import { FileText, Image as ImageIcon, Minimize2, Copy } from 'lucide-react'
+import { useI18n } from '../i18n'
 
 interface PopularToolsProps {
-  onSelectTool: (toolId: string) => void
+  onSelectTool: (toolId: string, acceptTypes: string) => void
 }
 
 export function PopularTools({ onSelectTool }: PopularToolsProps) {
+  const { t } = useI18n()
+
   const tools = [
     {
       id: 'pdf-to-jpg',
-      title: 'PDF Converter',
+      title: t.popular.pdfConverter,
+      description: t.popular.pdfConverterDesc,
+      accept: '.pdf,application/pdf',
       icon: FileText,
-      iconColor: 'text-[#DC2626]', // PDF Red
+      iconColor: 'text-[#DC2626]',
       iconBg: 'bg-red-50',
     },
     {
       id: 'jpg-to-pdf',
-      title: 'Image Converter',
+      title: t.popular.imageConverter,
+      description: t.popular.imageConverterDesc,
+      accept: '.jpg,.jpeg,.png,.webp,image/*',
       icon: ImageIcon,
-      iconColor: 'text-[#2563EB]', // Blue
+      iconColor: 'text-[#2563EB]',
       iconBg: 'bg-blue-50',
     },
     {
       id: 'compress-pdf',
-      title: 'Compress PDF',
+      title: t.popular.compressPdf,
+      description: t.popular.compressPdfDesc,
+      accept: '.pdf,application/pdf',
       icon: Minimize2,
       iconColor: 'text-[#2563EB]',
       iconBg: 'bg-blue-50',
     },
     {
       id: 'merge-pdf',
-      title: 'Merge PDF',
+      title: t.popular.mergePdf,
+      description: t.popular.mergePdfDesc,
+      accept: '.pdf,application/pdf',
       icon: Copy,
       iconColor: 'text-[#2563EB]',
       iconBg: 'bg-blue-50',
@@ -37,27 +48,34 @@ export function PopularTools({ onSelectTool }: PopularToolsProps) {
   ]
 
   return (
-    <div className="w-full max-w-[800px] mx-auto mt-8">
-      <h3 className="text-base font-bold text-[#0F172A] mb-3">
-        Popular tools
+    <div className="w-full max-w-[800px] mx-auto mt-6">
+      <h3 className="text-sm sm:text-base font-bold text-[#0F172A] mb-3">
+        {t.popular.title}
       </h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        {tools.map((t) => {
-          const Icon = t.icon
+        {tools.map((item) => {
+          const Icon = item.icon
           return (
             <button
-              key={t.id}
+              key={item.id}
               type="button"
-              onClick={() => onSelectTool(t.id)}
-              className="w-full p-4 rounded-xl border border-[#E2E8F0] bg-white hover:border-[#93C5FD] hover:bg-[#F8FAFC] transition-all text-left flex items-center gap-3.5 group cursor-pointer shadow-2xs"
+              onClick={() => onSelectTool(item.id, item.accept)}
+              className="w-full p-3.5 sm:p-4 rounded-xl border border-[#E2E8F0] bg-white hover:border-[#93C5FD] hover:bg-[#F8FAFC] transition-all text-left flex items-start gap-3.5 group cursor-pointer shadow-2xs"
             >
-              <div className={`w-9 h-9 rounded-lg ${t.iconBg} ${t.iconColor} flex items-center justify-center shrink-0`}>
+              <div
+                className={`w-10 h-10 rounded-lg ${item.iconBg} ${item.iconColor} flex items-center justify-center shrink-0 mt-0.5`}
+              >
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors">
-                {t.title}
-              </span>
+              <div className="min-w-0 flex-1">
+                <span className="text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors block">
+                  {item.title}
+                </span>
+                <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed line-clamp-1">
+                  {item.description}
+                </p>
+              </div>
             </button>
           )
         })}

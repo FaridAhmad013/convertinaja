@@ -1,24 +1,26 @@
+import { Sparkles } from 'lucide-react'
+import { useI18n } from '../i18n'
+
 export function Hero() {
+  const { t } = useI18n()
+
   return (
-    <section className="pt-10 pb-6 sm:pt-14 sm:pb-8 text-center px-4 sm:px-6">
-      <div className="max-w-2xl mx-auto space-y-3.5">
-        {/* Pill Badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFF6FF] text-[#2563EB] text-xs font-semibold tracking-wider uppercase">
-          SIMPLE FILE CONVERSION
-        </div>
-
-        {/* Heading */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
-          Convert your files.
-          <br />
-          <span className="text-[#2563EB]">Simply and quickly.</span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-sm sm:text-base text-[#64748B] max-w-lg mx-auto">
-          All your file conversion tools in one place.
-        </p>
+    <section className="pt-10 pb-6 text-center px-4 max-w-[800px] mx-auto">
+      {/* Pill Badge */}
+      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/60 text-[#2563EB] text-xs font-semibold uppercase tracking-wider mb-4 shadow-2xs">
+        <Sparkles className="w-3.5 h-3.5" />
+        <span>{t.hero.badge}</span>
       </div>
+
+      {/* Main Headline */}
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#0F172A] tracking-tight mb-3">
+        {t.hero.title}
+      </h1>
+
+      {/* Subtitle */}
+      <p className="text-sm sm:text-base text-[#64748B] max-w-xl mx-auto leading-relaxed">
+        {t.hero.subtitle}
+      </p>
     </section>
   )
 }

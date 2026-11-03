@@ -2,26 +2,32 @@ import { useState } from 'react'
 import { ArrowRight, Settings2, AlertTriangle, Layers, Check } from 'lucide-react'
 import type { ToolDefinition, UploadedFile } from '../types/conversion'
 import { getCompatibleTools } from '../services/toolsCatalog'
+import { useI18n } from '../i18n'
 
 interface InlineToolSelectorProps {
   files: UploadedFile[]
+  initialToolId?: string | null
   onStartConversion: (tool: ToolDefinition, options: Record<string, unknown>) => void
   isProcessing?: boolean
 }
 
 export function InlineToolSelector({
   files,
+  initialToolId,
   onStartConversion,
   isProcessing,
 }: InlineToolSelectorProps) {
+  const { t } = useI18n()
   const compatibleTools = getCompatibleTools(files)
   const [chosenToolId, setChosenToolId] = useState<string | null>(null)
 
-  // Synchronize chosen tool safely
+  // Synchronize chosen tool safely without useEffect
   const selectedToolId =
-    chosenToolId && compatibleTools.some((t) => t.id === chosenToolId)
+    chosenToolId && compatibleTools.some((tool) => tool.id === chosenToolId)
       ? chosenToolId
-      : (compatibleTools[0]?.id ?? '')
+      : initialToolId && compatibleTools.some((tool) => tool.id === initialToolId)
+        ? initialToolId
+        : (compatibleTools[0]?.id ?? '')
 
   // Conversion options state
   const [dpi, setDpi] = useState<number>(300) // Default: Best Quality (300 DPI)
@@ -40,10 +46,10 @@ export function InlineToolSelector({
       <div className="w-full max-w-[800px] mx-auto bg-amber-50 border border-amber-200 rounded-xl p-5 text-center">
         <AlertTriangle className="w-8 h-8 text-amber-600 mx-auto mb-2" />
         <h4 className="font-semibold text-sm sm:text-base text-amber-900 mb-1">
-          Kombinasi Berkas Belum Didukung
+          {t.selector.unsupportedComb}
         </h4>
         <p className="text-xs sm:text-sm text-amber-800 max-w-md mx-auto">
-          Format atau jumlah file yang dipilih tidak memiliki tool yang cocok sekaligus. Pastikan berkas yang diunggah memiliki tipe yang seragam.
+          {t.selector.unsupportedCombDesc}
         </p>
       </div>
     )
@@ -73,10 +79,10 @@ export function InlineToolSelector({
         <div className="flex items-center justify-between mb-3">
           <label className="text-sm font-semibold text-[#0F172A] flex items-center gap-1.5">
             <Layers className="w-4 h-4 text-[#2563EB]" />
-            Pilih Operasi Konversi
+            {t.selector.chooseOperation}
           </label>
           <span className="text-xs text-[#64748B]">
-            {compatibleTools.length} tool tersedia
+            {t.selector.toolsAvailable(compatibleTools.length)}
           </span>
         </div>
 
@@ -111,7 +117,7 @@ export function InlineToolSelector({
                 </div>
                 <div className="mt-2.5 pt-2 border-t border-black/5 flex items-center justify-between">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">
-                    Output: <strong className="text-[#0F172A]">{tool.outputFormat}</strong>
+                    {t.selector.output} <strong className="text-[#0F172A]">{tool.outputFormat}</strong>
                   </span>
                 </div>
               </button>
@@ -125,32 +131,32 @@ export function InlineToolSelector({
         <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl space-y-3">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0F172A]">
             <Settings2 className="w-4 h-4 text-[#2563EB]" />
-            <span>Opsi Konversi: {selectedTool.name}</span>
+            <span>{t.selector.optionsTitle(selectedTool.name)}</span>
           </div>
 
           {/* Image Quality (DPI) Selection */}
           {selectedTool.optionsType === 'quality' && (
             <div className="space-y-2">
               <label className="text-xs text-[#64748B] block">
-                Pilih Kualitas Gambar (Resolusi DPI):
+                {t.selector.qualityLabel}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[
                   {
                     val: 300,
-                    label: 'Kualitas Terbaik (HD)',
-                    sub: '300 DPI — Teks sangat tajam (Default)',
-                    badge: 'Rekomendasi',
+                    label: t.selector.bestQuality,
+                    sub: t.selector.bestQualitySub,
+                    badge: t.selector.bestBadge,
                   },
                   {
                     val: 150,
-                    label: 'Standar (Web)',
-                    sub: '150 DPI — Ukuran berkas lebih hemat',
+                    label: t.selector.standardQuality,
+                    sub: t.selector.standardQualitySub,
                   },
                   {
                     val: 600,
-                    label: 'Ultra HD',
-                    sub: '600 DPI — Detail tinggi untuk arsip',
+                    label: t.selector.ultraQuality,
+                    sub: t.selector.ultraQualitySub,
                   },
                 ].map((item) => {
                   const isCur = dpi === item.val
@@ -168,7 +174,7 @@ export function InlineToolSelector({
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold">{item.label}</span>
                         {item.badge && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-[#1D4ED8]">
                             {item.badge}
                           </span>
                         )}
@@ -185,24 +191,24 @@ export function InlineToolSelector({
           {selectedTool.optionsType === 'compression_level' && (
             <div className="space-y-2">
               <label className="text-xs text-[#64748B] block">
-                Pilih Rasio Kompresi Dokumen:
+                {t.selector.compressionLabel}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[
                   {
                     val: 'recommended',
-                    label: 'Rekomendasi',
-                    sub: 'Kualitas baik, ukuran berkurang signifikan',
+                    label: t.selector.compRecommended,
+                    sub: t.selector.compRecommendedSub,
                   },
                   {
                     val: 'low',
-                    label: 'Kompresi Rendah',
-                    sub: 'Kualitas cetak tertinggi (300 DPI)',
+                    label: t.selector.compLow,
+                    sub: t.selector.compLowSub,
                   },
                   {
                     val: 'high',
-                    label: 'Kompresi Ekstrem',
-                    sub: 'Ukuran sekecil mungkin (72 DPI)',
+                    label: t.selector.compHigh,
+                    sub: t.selector.compHighSub,
                   },
                 ].map((item) => {
                   const isCur = compressionLevel === item.val
@@ -230,14 +236,14 @@ export function InlineToolSelector({
           {selectedTool.optionsType === 'page_range' && (
             <div className="space-y-1.5">
               <label htmlFor="pageRangeInput" className="text-xs text-[#64748B] block">
-                Rentang Halaman (Contoh: "1-5", "1,3,7", atau "all"):
+                {t.selector.pageRangeLabel}
               </label>
               <input
                 id="pageRangeInput"
                 type="text"
                 value={pageRange}
                 onChange={(e) => setPageRange(e.target.value)}
-                placeholder="all"
+                placeholder={t.selector.pageRangePlaceholder}
                 className="w-full bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
               />
             </div>
@@ -248,7 +254,7 @@ export function InlineToolSelector({
       {/* 3. Action Group */}
       <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#E2E8F0]">
         <div className="text-xs text-[#64748B]">
-          {validFiles.length} file dipilih • Privasi aman (dihapus setelah 60 menit)
+          {t.selector.privacyText(validFiles.length)}
         </div>
 
         <button
@@ -258,10 +264,10 @@ export function InlineToolSelector({
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-sm shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isProcessing ? (
-            <span>Memproses...</span>
+            <span>{t.selector.processingButton}</span>
           ) : (
             <>
-              <span>Konversi Sekarang</span>
+              <span>{t.selector.convertButton}</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}
