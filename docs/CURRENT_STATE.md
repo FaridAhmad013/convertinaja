@@ -22,7 +22,7 @@
 | **Conversion Engines** | Implemented (Phase 1) | `PopplerEngine` wrapper implemented for merge, split, compress (Ghostscript), PDF-to-image/txt/html, and extract images behind `Engine` interface. |
 | **Backend Endpoints** | Implemented | REST handlers for `POST /api/v1/conversions`, `GET /status`, `GET /download`, `DELETE /conversions/{id}` with CORS and Zerolog logging. All unit/handler tests passing. |
 | **Database & Queue** | In Progress | In-memory thread-safe adapter active; PostgreSQL migrations and Redis queue consumer ready for container deployment. |
-| **Infrastructure** | Pending | `docker-compose.yml` and Nginx reverse proxy configuration to be implemented. |
+| **Infrastructure** | Implemented | `docker-compose.yml`, multi-stage Dockerfiles (`api`, `worker`, `frontend`), Nginx reverse proxy configuration with rate-limits, and helper scripts completed. Validated with `docker compose config`. |
 
 ---
 

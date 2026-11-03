@@ -1,0 +1,42 @@
+# ==========================================
+# Stage 1: Build worker binary
+# ==========================================
+FROM golang:1.24-bookworm AS builder
+
+WORKDIR /src
+
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+
+COPY backend/ .
+
+# In Phase 1, api handles in-process execution; worker can run api binary as background processor
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /out/worker ./cmd/api
+
+# ==========================================
+# Stage 2: Heavy conversion runner
+# ==========================================
+FROM debian:bookworm-slim AS runner
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    tzdata \
+    poppler-utils \
+    ghostscript \
+    libreoffice-nogui \
+    fonts-dejavu \
+    fonts-liberation \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -g 10001 appgroup && \
+    useradd -u 10001 -g appgroup -m -s /bin/sh appuser
+
+WORKDIR /app
+COPY --from=builder /out/worker /app/worker
+
+RUN mkdir -p /tmp/convertinaja/jobs && \
+    chown -R appuser:appgroup /tmp/convertinaja /app
+
+USER appuser
+
+ENTRYPOINT ["/app/worker"]

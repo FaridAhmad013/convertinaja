@@ -1,0 +1,127 @@
+services:
+  # 1. Reverse Proxy & Frontend Static Delivery
+  nginx:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.frontend
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  # 2. Go API Server
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    environment:
+      APP_PORT: "8080"
+      APP_ENV: "production"
+      STORAGE_DIR: "/tmp/convertinaja/jobs"
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_USER: "convertuser"
+      DB_PASSWORD: "convertpassword"
+      DB_NAME: "convertinaja"
+      REDIS_ADDR: "redis:6379"
+    volumes:
+      - job_data:/tmp/convertinaja/jobs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # 3. Dedicated Background Conversion Worker
+  worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    environment:
+      STORAGE_DIR: "/tmp/convertinaja/jobs"
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_USER: "convertuser"
+      DB_PASSWORD: "convertpassword"
+      DB_NAME: "convertinaja"
+      REDIS_ADDR: "redis:6379"
+    volumes:
+      - job_data:/tmp/convertinaja/jobs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # 4. PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: convertuser
+      POSTGRES_PASSWORD: convertpassword
+      POSTGRES_DB: convertinaja
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U convertuser -d convertinaja"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # 5. Redis Task Queue & Cache
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+volumes:
+  job_data:
+  pgdata:
