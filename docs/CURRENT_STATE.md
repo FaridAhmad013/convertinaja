@@ -18,6 +18,7 @@
 | **Documentation & Rules** | Complete | Root & sub-level `AGENTS.md` and complete `docs/*.md` suite established. |
 | **Backend Scaffold** | Initialized | Chi router, Zerolog, `.env`, basic `/health` check functional. |
 | **Frontend Scaffold** | Initialized | Vite + React 19 + TypeScript + Tailwind CSS initialized. |
+| **Frontend UI/UX** | Implemented | Clean SaaS Light Mode homepage implemented according to UI/UX specification (Navbar, Hero, UploadZone, FileList, InlineToolSelector, ConversionStatus, ToolsCatalog, HowItWorks, Footer). Oxlint & build pass. |
 | **Conversion Engines** | Pending | Poppler & Ghostscript wrapper adapters to be implemented in `backend/internal/converter/`. |
 | **Database & Queue** | Pending | PostgreSQL migration schemas and Redis queue dispatcher to be implemented. |
 | **Infrastructure** | Pending | `docker-compose.yml` and Nginx reverse proxy configuration to be implemented. |

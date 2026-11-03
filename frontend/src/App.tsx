@@ -1,121 +1,168 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useRef } from 'react'
+import { Navbar } from './components/Navbar'
+import { Hero } from './components/Hero'
+import { UploadZone } from './components/UploadZone'
+import { FileList } from './components/FileList'
+import { InlineToolSelector } from './components/InlineToolSelector'
+import { ConversionStatus } from './components/ConversionStatus'
+import { ToolsCatalog } from './components/ToolsCatalog'
+import { HowItWorks } from './components/HowItWorks'
+import { Footer } from './components/Footer'
+import type { UploadedFile, ToolDefinition, ConversionJobResult } from './types/conversion'
+import { validateUploadedFile } from './services/toolsCatalog'
 
-function App() {
-  const [count, setCount] = useState(0)
+export function App() {
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const [currentJob, setCurrentJob] = useState<ConversionJobResult | null>(null)
+  const [catalogCategory, setCatalogCategory] = useState<string>('all')
+  const uploadSectionRef = useRef<HTMLDivElement>(null)
+
+  // Handle files added via Drag & Drop or File Picker
+  const handleFilesAdded = (files: FileList | File[]) => {
+    const fileArray = Array.from(files)
+    const newItems: UploadedFile[] = fileArray.map((file) => {
+      const validation = validateUploadedFile(file)
+      return {
+        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+        file,
+        name: file.name,
+        size: file.size,
+        format: validation.format,
+        isValid: validation.isValid,
+        errorMessage: validation.errorMessage,
+      }
+    })
+
+    setUploadedFiles((prev) => [...prev, ...newItems])
+  }
+
+  // Remove a single file from the list
+  const handleRemoveFile = (id: string) => {
+    setUploadedFiles((prev) => prev.filter((f) => f.id !== id))
+  }
+
+  // Trigger add more files by finding and triggering file input
+  const handleAddMoreFiles = () => {
+    const inputEl = document.querySelector('input[type="file"]') as HTMLInputElement | null
+    inputEl?.click()
+  }
+
+  // Start conversion handler
+  const handleStartConversion = (tool: ToolDefinition, _options: Record<string, unknown>) => {
+    const validFiles = uploadedFiles.filter((f) => f.isValid)
+    if (validFiles.length === 0) return
+
+    // Initialize job state
+    const simulatedJobId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2)
+    const simulatedToken = Math.random().toString(36).substring(2, 10)
+
+    setCurrentJob({
+      jobId: simulatedJobId,
+      accessToken: simulatedToken,
+      status: 'uploading',
+      action: tool.name,
+      filesCount: validFiles.length,
+    })
+
+    // Simulate flow: uploading -> validating -> processing -> completed
+    setTimeout(() => {
+      setCurrentJob((prev) => (prev ? { ...prev, status: 'validating' } : null))
+    }, 800)
+
+    setTimeout(() => {
+      setCurrentJob((prev) => (prev ? { ...prev, status: 'processing' } : null))
+    }, 1800)
+
+    setTimeout(() => {
+      setCurrentJob((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: 'completed',
+              downloadUrl: `#download-${simulatedJobId}`,
+              batchDownloadUrl: validFiles.length > 1 ? `#batch-${simulatedJobId}.zip` : undefined,
+              fileSize: 1024 * 350,
+            }
+          : null
+      )
+    }, 3800)
+  }
+
+  // Reset to upload another
+  const handleReset = () => {
+    setCurrentJob(null)
+    setUploadedFiles([])
+  }
+
+  // Scroll to upload when clicking catalog or nav items
+  const handleCategorySelect = (category: string) => {
+    setCatalogCategory(category)
+    const toolsEl = document.getElementById('tools')
+    toolsEl?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
+      {/* 3.1 Navbar */}
+      <Navbar onSelectCategory={handleCategorySelect} />
+
+      <main className="flex-1">
+        {/* 3.2 Hero Section */}
+        <Hero />
+
+        {/* 3.3 Upload Section & Inline Experience */}
+        <section
+          ref={uploadSectionRef}
+          aria-label="Upload and Conversion Area"
+          className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4"
         >
-          Count is {count}
-        </button>
-      </section>
+          {/* If there is an active job or completed state */}
+          {currentJob ? (
+            <ConversionStatus job={currentJob} onReset={handleReset} />
+          ) : (
+            <>
+              {/* Dropzone Area */}
+              <UploadZone
+                onFilesSelected={handleFilesAdded}
+                disabled={Boolean(currentJob)}
+              />
 
-      <div className="ticks"></div>
+              {/* Uploaded File List */}
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-4 mt-4">
+                  <FileList
+                    files={uploadedFiles}
+                    onRemoveFile={handleRemoveFile}
+                    onAddMoreClick={handleAddMoreFiles}
+                  />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+                  {/* 4.4 Inline Tool Selection */}
+                  <InlineToolSelector
+                    files={uploadedFiles}
+                    onStartConversion={handleStartConversion}
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        {/* 3.4 Tools Section */}
+        <ToolsCatalog
+          activeCategory={catalogCategory}
+          onSelectToolTrigger={(_toolId) => {
+            uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
+            handleAddMoreFiles()
+          }}
+        />
+
+        {/* 3.5 How It Works */}
+        <HowItWorks />
+      </main>
+
+      {/* 3.6 Footer */}
+      <Footer />
+    </div>
   )
 }
 
