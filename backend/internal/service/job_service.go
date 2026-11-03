@@ -189,7 +189,7 @@ func (s *JobService) GetJob(jobID, token string) (*JobRecord, error) {
 	return record, nil
 }
 
-func (s *JobService) GetDownloadArtifact(jobID, token string, isBatch bool, index int) (filePath string, mimeType string, filename string, err error) {
+func (s *JobService) GetDownloadArtifact(jobID, token string, isBatch bool, index int, indices []int) (filePath string, mimeType string, filename string, err error) {
 	record, err := s.GetJob(jobID, token)
 	if err != nil {
 		return "", "", "", err
@@ -197,6 +197,25 @@ func (s *JobService) GetDownloadArtifact(jobID, token string, isBatch bool, inde
 
 	if record.Status != StatusCompleted {
 		return "", "", "", ErrJobNotCompleted
+	}
+
+	// If multiple specific indices selected, bundle into zip on the fly
+	if len(indices) > 1 {
+		var selectedPaths []string
+		for _, idx := range indices {
+			if idx >= 0 && idx < len(record.ResultPaths) {
+				selectedPaths = append(selectedPaths, record.ResultPaths[idx])
+			}
+		}
+		if len(selectedPaths) > 0 {
+			zipName := fmt.Sprintf("selected-%d.zip", time.Now().UnixNano())
+			zipPath, zipErr := s.storage.CreateCustomZipArchive(jobID, selectedPaths, zipName)
+			if zipErr == nil {
+				return zipPath, "application/zip", fmt.Sprintf("convertinaja-selected-%s.zip", jobID[:8]), nil
+			}
+		}
+	} else if len(indices) == 1 {
+		index = indices[0]
 	}
 
 	if isBatch && record.BatchArchivePath != "" {

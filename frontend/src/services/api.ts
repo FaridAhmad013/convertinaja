@@ -42,13 +42,26 @@ export class ApiError extends Error {
   }
 }
 
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+
 export async function createConversionJob(
   files: File[],
   action: string,
   options?: Record<string, unknown>
 ): Promise<CreateJobResponse> {
+  const requestUID = generateUUID()
   const formData = new FormData()
   formData.append('action', action)
+  formData.append('request_id', requestUID)
 
   if (options && Object.keys(options).length > 0) {
     formData.append('options', JSON.stringify(options))
@@ -60,6 +73,9 @@ export async function createConversionJob(
 
   const response = await fetch(`${API_BASE_URL}/conversions`, {
     method: 'POST',
+    headers: {
+      'X-Request-ID': requestUID,
+    },
     body: formData,
   })
 
@@ -102,6 +118,10 @@ export async function getJobStatus(jobId: string, token: string): Promise<JobSta
 
 export function buildDownloadUrl(jobId: string, token: string): string {
   return `${API_BASE_URL}/conversions/${encodeURIComponent(jobId)}/download?token=${encodeURIComponent(token)}`
+}
+
+export function buildDownloadSelectedUrl(jobId: string, token: string, indices: number[]): string {
+  return `${API_BASE_URL}/conversions/${encodeURIComponent(jobId)}/download?token=${encodeURIComponent(token)}&indices=${indices.join(',')}`
 }
 
 export async function cancelConversionJob(jobId: string, token: string): Promise<void> {

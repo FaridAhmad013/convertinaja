@@ -48,7 +48,7 @@ export function PopularTools({ onSelectTool }: PopularToolsProps) {
   ]
 
   return (
-    <div className="w-full max-w-[800px] mx-auto mt-6">
+    <div id="popular-tools" className="w-full max-w-[800px] mx-auto mt-6">
       <h3 className="text-sm sm:text-base font-bold text-[#0F172A] mb-3">
         {t.popular.title}
       </h3>

@@ -72,8 +72,13 @@ func (s *Storage) CleanupJob(jobID string) error {
 
 // CreateZipArchive bundles multiple output files into a single ZIP archive for batch download
 func (s *Storage) CreateZipArchive(jobID string, filePaths []string) (string, error) {
+	return s.CreateCustomZipArchive(jobID, filePaths, "bundle.zip")
+}
+
+// CreateCustomZipArchive bundles given file paths into a specified zip archive name inside job directory
+func (s *Storage) CreateCustomZipArchive(jobID string, filePaths []string, zipName string) (string, error) {
 	jobDir := s.GetJobDir(jobID)
-	zipPath := filepath.Join(jobDir, "bundle.zip")
+	zipPath := filepath.Join(jobDir, zipName)
 
 	zipFile, err := os.Create(zipPath)
 	if err != nil {
@@ -85,33 +90,33 @@ func (s *Storage) CreateZipArchive(jobID string, filePaths []string) (string, er
 	defer w.Close()
 
 	for _, path := range filePaths {
-		info, err := os.Stat(path)
-		if err != nil || info.IsDir() {
+		info, statErr := os.Stat(path)
+		if statErr != nil || info.IsDir() {
 			continue
 		}
 
-		f, err := os.Open(path)
-		if err != nil {
-			return "", err
+		f, openErr := os.Open(path)
+		if openErr != nil {
+			return "", openErr
 		}
 
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
+		header, headerErr := zip.FileInfoHeader(info)
+		if headerErr != nil {
 			f.Close()
-			return "", err
+			return "", headerErr
 		}
 		header.Name = filepath.Base(path)
 		header.Method = zip.Deflate
 
-		writer, err := w.CreateHeader(header)
-		if err != nil {
+		writer, createErr := w.CreateHeader(header)
+		if createErr != nil {
 			f.Close()
-			return "", err
+			return "", createErr
 		}
 
-		if _, err := io.Copy(writer, f); err != nil {
+		if _, copyErr := io.Copy(writer, f); copyErr != nil {
 			f.Close()
-			return "", err
+			return "", copyErr
 		}
 		f.Close()
 	}

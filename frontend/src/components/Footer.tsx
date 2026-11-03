@@ -1,4 +1,4 @@
-import { FileCode2, ExternalLink } from 'lucide-react'
+import { FileCode2, ExternalLink, Heart } from 'lucide-react'
 import { useI18n } from '../i18n'
 import type { LegalTab } from './LegalModal'
 
@@ -11,12 +11,11 @@ export function Footer({ onOpenLegal }: FooterProps) {
   const isId = lang === 'id'
 
   return (
-    <footer className="w-full bg-white border-t border-[#E2E8F0]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <footer className="w-full border-t border-[#E2E8F0] bg-white py-8 transition-colors">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Top Section */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-[#E2E8F0] text-center md:text-left">
-          {/* Logo & Tagline */}
-          <div className="space-y-1">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2">
               <div className="w-7 h-7 rounded-lg bg-[#2563EB] flex items-center justify-center text-white">
                 <FileCode2 className="w-4 h-4" />
@@ -30,17 +29,37 @@ export function Footer({ onOpenLegal }: FooterProps) {
             </p>
           </div>
 
-          {/* Matched SaaS Portfolio Badge */}
-          <div className="flex items-center gap-2">
+          {/* Dibuat dengan cinta / Author Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-xs font-medium text-[#0F172A]">
+              <span>{isId ? 'Dibuat dengan' : 'Built with'}</span>
+              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
+              <span>oleh <strong className="font-semibold text-[#0F172A]">Farid Ahmad</strong></span>
+            </div>
+
             <a
               href="https://faridahmad.dev"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#EFF6FF] hover:border-[#BFDBFE] text-xs font-semibold text-[#0F172A] transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-blue-100 text-xs font-semibold text-[#2563EB] transition-colors"
+              title="Kunjungi Portofolio Farid Ahmad"
             >
-              <span className="text-[#64748B] font-normal">{isId ? 'Dibuat oleh' : 'Built by'}</span>
-              <span className="text-[#2563EB]">Farid Ahmad</span>
-              <ExternalLink className="w-3.5 h-3.5 text-[#2563EB]" />
+              <span>Portofolio</span>
+              <ExternalLink className="w-3 h-3 text-[#2563EB]" />
+            </a>
+
+            <a
+              href="https://www.linkedin.com/in/faridahmad013"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#CBD5E1] bg-white hover:bg-slate-50 text-xs font-semibold text-[#0A66C2] transition-colors"
+              title="Profil LinkedIn Farid Ahmad"
+            >
+              <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.6 1.6 0 0 0-1.6 1.6 1.6 1.6 0 0 0 1.6 1.6 1.6 1.6 0 0 0 1.6-1.6 1.6 1.6 0 0 0-1.6-1.6Z" />
+              </svg>
+              <span>LinkedIn</span>
+              <ExternalLink className="w-3 h-3 text-[#0A66C2]" />
             </a>
           </div>
         </div>

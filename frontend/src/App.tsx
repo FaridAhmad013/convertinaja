@@ -12,6 +12,7 @@ import { EditorialGuides } from './components/EditorialGuides'
 import { Footer } from './components/Footer'
 import { Toast } from './components/Toast'
 import { LegalModal, type LegalTab } from './components/LegalModal'
+import { MobileBottomNav } from './components/MobileBottomNav'
 import type { UploadedFile, ToolDefinition } from './types/conversion'
 import { validateUploadedFile } from './services/toolsCatalog'
 import { useConversion } from './hooks/useConversion'
@@ -151,7 +152,7 @@ export function App() {
         {/* 3.1 Navbar */}
         <Navbar onSelectCategory={handleCategorySelect} onOpenLegal={handleOpenLegal} />
 
-        <main className="flex-1 pb-16">
+        <main className="flex-1 pb-24 sm:pb-16">
           {/* 3.2 Hero Section */}
           <Hero />
 
@@ -224,6 +225,27 @@ export function App() {
 
         {/* 3.7 Footer */}
         <Footer onOpenLegal={handleOpenLegal} />
+
+        {/* Mobile App Bottom Navigation Bar */}
+        <MobileBottomNav
+          onGoToUpload={() => {
+            uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
+          onGoToPopular={() => {
+            const el = document.getElementById('popular-tools') || uploadSectionRef.current
+            el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
+          onGoToCatalog={() => {
+            const el = document.getElementById('tools')
+            el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
+          onGoToGuides={() => {
+            const el = document.getElementById('guides') || document.getElementById('faq')
+            el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
+          onOpenLegal={handleOpenLegal}
+          hasActiveJob={Boolean(job)}
+        />
 
         {/* Legal & Info Modal (Privacy Policy, Terms of Service, About Us, Contact) */}
         <LegalModal

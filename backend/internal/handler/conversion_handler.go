@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -20,6 +22,7 @@ import (
 type ConversionHandler struct {
 	storage    *storage.Storage
 	jobService *service.JobService
+	reqCache   sync.Map
 }
 
 func NewConversionHandler(store *storage.Storage, svc *service.JobService) *ConversionHandler {
@@ -58,6 +61,27 @@ func extractToken(r *http.Request) string {
 
 // POST /api/v1/conversions
 func (h *ConversionHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
+	// Anti-spam UID check
+	reqUID := strings.TrimSpace(r.Header.Get("X-Request-ID"))
+	if reqUID == "" {
+		reqUID = strings.TrimSpace(r.FormValue("request_id"))
+	}
+
+	if reqUID != "" {
+		if _, err := uuid.Parse(reqUID); err != nil {
+			writeError(w, http.StatusBadRequest, "Invalid request UID format; must be valid UUID")
+			return
+		}
+
+		if prevTimeVal, loaded := h.reqCache.Load(reqUID); loaded {
+			if prevTime, ok := prevTimeVal.(time.Time); ok && time.Since(prevTime) < 30*time.Second {
+				writeError(w, http.StatusTooManyRequests, "Permintaan ganda terdeteksi (anti-spam), mohon tunggu.")
+				return
+			}
+		}
+		h.reqCache.Store(reqUID, time.Now())
+	}
+
 	// 55MB multipart parse ceiling
 	if err := r.ParseMultipartForm(55 << 20); err != nil {
 		writeError(w, http.StatusRequestEntityTooLarge, "Request payload exceeds size limit")
@@ -215,12 +239,22 @@ func (h *ConversionHandler) DownloadArtifact(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
+	var indices []int
+	if indicesStr := r.URL.Query().Get("indices"); indicesStr != "" {
+		for _, part := range strings.Split(indicesStr, ",") {
+			part = strings.TrimSpace(part)
+			if parsed, err := strconv.Atoi(part); err == nil {
+				indices = append(indices, parsed)
+			}
+		}
+	}
+
 	if token == "" {
 		writeError(w, http.StatusUnauthorized, "Missing access token")
 		return
 	}
 
-	filePath, mimeType, filename, err := h.jobService.GetDownloadArtifact(jobID, token, isBatch, index)
+	filePath, mimeType, filename, err := h.jobService.GetDownloadArtifact(jobID, token, isBatch, index, indices)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidToken) {
 			writeError(w, http.StatusUnauthorized, "Invalid job access token")
