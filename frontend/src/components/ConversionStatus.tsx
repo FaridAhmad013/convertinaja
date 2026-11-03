@@ -15,6 +15,8 @@ import {
   Square,
   Eye,
   Check,
+  ArrowLeftRight,
+  Sparkles,
 } from 'lucide-react'
 import type { ConversionJobResult, ConvertedFileItem } from '../types/conversion'
 import { buildDownloadSelectedUrl } from '../services/api'
@@ -22,7 +24,10 @@ import { useI18n } from '../i18n'
 
 interface ConversionStatusProps {
   job: ConversionJobResult
+  hasOriginalFiles?: boolean
   onReset: () => void
+  onConvertSameFile?: () => void
+  onConvertResultFile?: () => void
 }
 
 interface ContextMenuState {
@@ -40,7 +45,13 @@ function formatBytes(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
 }
 
-export function ConversionStatus({ job, onReset }: ConversionStatusProps) {
+export function ConversionStatus({
+  job,
+  hasOriginalFiles,
+  onReset,
+  onConvertSameFile,
+  onConvertResultFile,
+}: ConversionStatusProps) {
   const { lang, t } = useI18n()
   const isId = lang === 'id'
 
@@ -318,6 +329,18 @@ export function ConversionStatus({ job, onReset }: ConversionStatusProps) {
                 </a>
               )}
 
+              {/* Convert same file to another format */}
+              {hasOriginalFiles && onConvertSameFile && (
+                <button
+                  type="button"
+                  onClick={onConvertSameFile}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                >
+                  <ArrowLeftRight className="w-4 h-4" />
+                  <span>{isId ? 'Konversi Berkas Ini ke Format Lain' : 'Convert File to Other Format'}</span>
+                </button>
+              )}
+
               {/* Convert Another File */}
               <button
                 type="button"
@@ -471,6 +494,30 @@ export function ConversionStatus({ job, onReset }: ConversionStatusProps) {
                   </span>
                 )}
               </a>
+            )}
+
+            {/* Convert same original file to another format */}
+            {hasOriginalFiles && onConvertSameFile && (
+              <button
+                type="button"
+                onClick={onConvertSameFile}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] font-bold text-sm transition-all cursor-pointer shadow-2xs"
+              >
+                <ArrowLeftRight className="w-4 h-4" />
+                <span>{isId ? 'Konversi Berkas Ini ke Format Lain' : 'Convert File to Other Format'}</span>
+              </button>
+            )}
+
+            {/* Convert resulting output file further */}
+            {onConvertResultFile && job.downloadUrl && (
+              <button
+                type="button"
+                onClick={onConvertResultFile}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-sm transition-all cursor-pointer shadow-2xs"
+              >
+                <Sparkles className="w-4 h-4 text-emerald-600" />
+                <span>{isId ? 'Lanjut Konversi Berkas Hasil' : 'Chain-Convert Result'}</span>
+              </button>
             )}
 
             {/* Convert Another File Button */}

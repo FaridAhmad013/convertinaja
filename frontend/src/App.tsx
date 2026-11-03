@@ -134,6 +134,57 @@ export function App() {
     }, 50)
   }
 
+  // Convert the previous original files into another tool / format directly
+  const handleConvertSameFile = () => {
+    resetJob()
+    setTimeout(() => {
+      toolSelectorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+  }
+
+  // Convert the generated output artifact directly as a new input
+  const handleConvertResultFile = async () => {
+    if (!job?.downloadUrl) return
+    try {
+      addToast('info', 'Menyiapkan berkas hasil untuk konversi berikutnya...')
+      const res = await fetch(job.downloadUrl)
+      if (!res.ok) throw new Error('Gagal mengambil berkas hasil')
+      const blob = await res.blob()
+
+      const contentType = res.headers.get('content-type') || ''
+      let ext = '.pdf'
+      if (contentType.includes('jpeg') || contentType.includes('jpg')) ext = '.jpg'
+      else if (contentType.includes('png')) ext = '.png'
+      else if (contentType.includes('webp')) ext = '.webp'
+      else if (contentType.includes('text/plain')) ext = '.txt'
+      else if (contentType.includes('text/markdown')) ext = '.md'
+      else if (contentType.includes('text/html')) ext = '.html'
+
+      const filename = `hasil_konversi${ext}`
+      const file = new File([blob], filename, { type: blob.type || 'application/octet-stream' })
+
+      const validation = validateUploadedFile(file)
+      const newItem: UploadedFile = {
+        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+        file,
+        name: filename,
+        size: file.size,
+        format: validation.format,
+        isValid: validation.isValid,
+        errorMessage: validation.errorMessage,
+      }
+
+      resetJob()
+      setUploadedFiles([newItem])
+      setPreferredToolId(null)
+      setTimeout(() => {
+        toolSelectorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    } catch {
+      addToast('error', 'Gagal memuat berkas hasil untuk konversi lanjutan.')
+    }
+  }
+
   // Scroll to tools catalog
   const handleCategorySelect = (category: string) => {
     setCatalogCategory(category)
@@ -165,7 +216,13 @@ export function App() {
             {/* Active Job / Result View */}
             {job ? (
               <div ref={statusSectionRef} className="scroll-mt-6">
-                <ConversionStatus job={job} onReset={handleReset} />
+                <ConversionStatus
+                  job={job}
+                  hasOriginalFiles={uploadedFiles.length > 0}
+                  onReset={handleReset}
+                  onConvertSameFile={handleConvertSameFile}
+                  onConvertResultFile={handleConvertResultFile}
+                />
               </div>
             ) : (
               <>
