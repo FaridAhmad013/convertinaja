@@ -3,12 +3,12 @@
 > **Platform Konversi Dokumen Cepat, Gratis & Nol Penyimpanan.**  
 > Ubah format PDF, Gambar, dan Office langsung dari peramban tanpa akun, tanpa pelacakan, dan dengan pemusnahan berkas seketika di server.
 
-🌐 **Website Resmi:** [https://convertinaja.faridahmad.dev](https://convertinaja.faridahmad.dev)  
-👨‍💻 **Pengembang:** [Farid Ahmad](https://faridahmad.dev)
+- **Website Resmi:** [https://convertinaja.faridahmad.dev](https://convertinaja.faridahmad.dev)  
+- **Pengembang:** [Farid Ahmad](https://faridahmad.dev)
 
 ---
 
-## ✨ Nilai Utama ConvertinAja
+## Nilai Utama ConvertinAja
 
 1. **Nol Penyimpanan (Zero-Storage Guarantee):**  
    Server ConvertinAja tidak menyimpan file Anda. Berkas asli yang diunggah langsung dihapus seketika dari server saat konversi selesai atau gagal. Berkas hasil hanya berada sementara di memori server dan dihapus otomatis setelah diunduh.
@@ -23,7 +23,7 @@
 
 ---
 
-## 🛠️ Mesin Konversi & Atribusi Lisensi Open-Source
+## Mesin Konversi & Atribusi Lisensi Open-Source
 
 ConvertinAja dibangun sebagai antarmuka orkestrasi web independen dan menghormati hak cipta perangkat lunak sumber terbuka:
 
@@ -34,7 +34,7 @@ ConvertinAja dibangun sebagai antarmuka orkestrasi web independen dan menghormat
 
 ---
 
-## 🚀 Fitur Alat Konversi
+## Fitur Alat Konversi
 
 - **Alat PDF:** Gabung PDF, Pisah PDF, Kompres PDF, PDF ke JPG, PDF ke PNG, PDF ke Teks, PDF ke Markdown, PDF ke HTML, Ekstrak Gambar PDF.
 - **Alat Gambar:** JPG ke PNG, PNG ke JPG, Gambar ke WebP, WebP ke JPG, WebP ke PNG, JPG/PNG ke PDF.
@@ -42,6 +42,6 @@ ConvertinAja dibangun sebagai antarmuka orkestrasi web independen dan menghormat
 
 ---
 
-## 📄 Lisensi
+## Lisensi
 
 Kode ConvertinAja dilisensikan di bawah [MIT License](LICENSE).

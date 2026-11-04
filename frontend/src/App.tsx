@@ -12,6 +12,7 @@ import { EditorialGuides } from './components/EditorialGuides'
 import { Footer } from './components/Footer'
 import { Toast } from './components/Toast'
 import { LegalView, type LegalPageSlug } from './components/LegalView'
+import { PrivacyBanner } from './components/PrivacyBanner'
 import { MobileBottomNav } from './components/MobileBottomNav'
 import type { UploadedFile, ToolDefinition } from './types/conversion'
 import { validateUploadedFile } from './services/toolsCatalog'
@@ -319,6 +320,9 @@ export function App() {
 
         {/* Floating Feedback Toasts */}
         <Toast toasts={toasts} onDismiss={dismissToast} />
+
+        {/* Floating Privacy Pill (Dismissable) */}
+        {!activeLegalPage && <PrivacyBanner onOpenPrivacy={handleOpenLegal} />}
       </div>
     </I18nContext.Provider>
   )
