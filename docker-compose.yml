@@ -1,11 +1,10 @@
 services:
   # 1. Reverse Proxy & Frontend Static Delivery
   nginx:
+    image: ghcr.io/faridahmad013/convertinaja-nginx:latest
     build:
       context: .
       dockerfile: infrastructure/docker/Dockerfile.frontend
-    volumes:
-      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       # Terikat ke localhost:8081 agar tidak bentrok dengan Nginx Host (Port 80/443 & 8080)
       - "127.0.0.1:8081:80"
@@ -23,6 +22,7 @@ services:
 
   # 2. Go API Server + Native CLI Conversion Engine (In-Process)
   api:
+    image: ghcr.io/faridahmad013/convertinaja-api:latest
     build:
       context: .
       dockerfile: infrastructure/docker/Dockerfile.api
