@@ -272,6 +272,7 @@ export function App() {
           <div className="mt-12 border-t border-[#E2E8F0]">
             <ToolsCatalog
               activeCategory={catalogCategory}
+              onCategoryChange={setCatalogCategory}
               onSelectToolTrigger={(toolId) => {
                 setPreferredToolId(toolId)
                 uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' })

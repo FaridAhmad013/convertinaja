@@ -7,13 +7,19 @@ import { useI18n } from '../i18n'
 interface ToolsCatalogProps {
   onSelectToolTrigger?: (toolId: string) => void
   activeCategory?: string
+  onCategoryChange?: (category: CategoryType | 'all') => void
 }
 
-export function ToolsCatalog({ onSelectToolTrigger, activeCategory }: ToolsCatalogProps) {
+export function ToolsCatalog({ onSelectToolTrigger, activeCategory, onCategoryChange }: ToolsCatalogProps) {
   const { t } = useI18n()
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'all'>('all')
 
   const currentTab = (activeCategory as CategoryType | 'all') || selectedCategory
+
+  const handleSelectCategory = (catId: CategoryType | 'all') => {
+    setSelectedCategory(catId)
+    onCategoryChange?.(catId)
+  }
 
   const categories = [
     { id: 'all', label: t.catalog.allTools },
@@ -45,7 +51,7 @@ export function ToolsCatalog({ onSelectToolTrigger, activeCategory }: ToolsCatal
           <button
             key={cat.id}
             type="button"
-            onClick={() => setSelectedCategory(cat.id as CategoryType | 'all')}
+            onClick={() => handleSelectCategory(cat.id as CategoryType | 'all')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
               currentTab === cat.id
                 ? 'bg-[#2563EB] text-white shadow-xs'
