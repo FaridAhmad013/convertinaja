@@ -112,16 +112,11 @@ export function Footer({ onOpenLegal }: FooterProps) {
             </ul>
           </div>
 
-          {/* Col 4: Creator, Portfolio & Connect (3 cols) - Clean Text Links identical to Policy column */}
+          {/* Col 4: Creator, Portfolio & Connect (3 cols) - Clean Text Links */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F172A]">
               {isId ? 'Pengembang' : 'Developer & Author'}
             </h4>
-            <p className="text-xs text-[#64748B] leading-relaxed">
-              {isId
-                ? 'Dikelola secara independen sebagai proyek FOSS untuk kemudahan produktivitas digital.'
-                : 'Independently engineered as a FOSS utility for everyday digital productivity.'}
-            </p>
 
             <ul className="space-y-2 text-xs text-[#64748B]">
               <li>
@@ -131,7 +126,7 @@ export function Footer({ onOpenLegal }: FooterProps) {
                   rel="noreferrer"
                   className="hover:text-[#2563EB] transition-colors"
                 >
-                  Farid Ahmad (Portofolio)
+                  Farid Ahmad
                 </a>
               </li>
               <li>
