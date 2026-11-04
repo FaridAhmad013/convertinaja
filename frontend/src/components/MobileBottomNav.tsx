@@ -1,13 +1,13 @@
 import { FileUp, Flame, LayoutGrid, BookOpen, ShieldCheck } from 'lucide-react'
 import { useI18n } from '../i18n'
-import type { LegalTab } from './LegalModal'
+import type { LegalPageSlug } from './LegalView'
 
 interface MobileBottomNavProps {
   onGoToUpload: () => void
   onGoToPopular: () => void
   onGoToCatalog: () => void
   onGoToGuides: () => void
-  onOpenLegal: (tab: LegalTab) => void
+  onOpenLegal: (slug: LegalPageSlug) => void
   hasActiveJob: boolean
 }
 

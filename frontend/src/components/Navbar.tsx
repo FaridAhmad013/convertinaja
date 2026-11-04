@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { FileCode2, Menu, X, Globe } from 'lucide-react'
 import { useI18n } from '../i18n'
-import type { LegalTab } from './LegalModal'
+import type { LegalPageSlug } from './LegalView'
 
 interface NavbarProps {
   onSelectCategory?: (category: string) => void
-  onOpenLegal?: (tab: LegalTab) => void
+  onOpenLegal?: (slug: LegalPageSlug) => void
 }
 
 export function Navbar({ onOpenLegal }: NavbarProps) {
@@ -24,10 +24,10 @@ export function Navbar({ onOpenLegal }: NavbarProps) {
     setLang(lang === 'id' ? 'en' : 'id')
   }
 
-  const handleLegalClick = (tab: LegalTab) => {
+  const handleLegalClick = (slug: LegalPageSlug) => {
     setMobileMenuOpen(false)
     if (onOpenLegal) {
-      onOpenLegal(tab)
+      onOpenLegal(slug)
     }
   }
 

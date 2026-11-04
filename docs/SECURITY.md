@@ -1,38 +1,29 @@
 # SECURITY GUIDELINES — ConvertinAja
 
-> Threat Model, Mitigations, and Validation Policies
+> Kebijakan Keamanan, Pemusnahan Berkas, dan Batasan Sistem
 
 ---
 
-## 1. Threat Model
+## 1. Kebijakan Nol Penyimpanan (Zero-Storage Policy)
 
-| Threat | Impact | Mitigation Strategy |
-| :--- | :--- | :--- |
-| **Malicious Payload / Polyglot File** | RCE via engine vulnerability | Magic bytes inspection, parser sandboxing, container privileges dropping |
-| **Decompression / ZIP Bomb** | Worker memory exhaustion (DoS) | Strict file size ceiling, max uncompressed limit, page limit (200 pages) |
-| **Path Traversal (`../../etc/passwd`)** | Arbitrary file overwrite or disclosure | Completely discard user filenames. Generate internal UUIDs for all disk operations |
-| **CLI Argument Injection** | Subprocess command hijacking | Pass arguments as slice tokens; never invoke shell strings (`sh -c`) |
-| **Unauthorized File Download** | Data leak across anonymous users | High-entropy random `access_token` validated via constant-time hash comparison |
-| **DDoS / Resource Starvation** | Server unresponsiveness | Nginx rate limiting, body size limits, max 3 concurrent active jobs per IP |
+ConvertinAja dirancang dengan arsitektur efemeral yang memprioritaskan privasi penuh:
+- **Pemusnahan Berkas Seketika:** Berkas mentah yang diunggah pengguna langsung dihapus seketika dari server (`os.Remove`) tepat setelah proses konversi selesai atau mengalami kegagalan.
+- **Isolasi Berkas:** Setiap sesi diproses dalam direktori terisolasi berbasis UUID acak (`/tmp/convertinaja/jobs/{job_id}/`).
+- **Pembersihan Darurat (Fail-safe Sweep):** Sistem pembersih otomatis menyapu direktori efemeral secara berkala semata-mata sebagai jaring pengaman skenario kegagalan sistem agar tidak ada berkas tertinggal di server.
 
 ---
 
-## 2. File Validation Pipeline
+## 2. Batas Waktu & Pengendalian Sumber Daya Server (5-Minute Hard Cap)
 
-Every uploaded file must pass validation before writing to disk or dispatching to the queue:
-
-1. **Size Boundary Check:** Reject before reading if `Content-Length > 10MB`.
-2. **Magic Bytes Sniffing:** Read first 512 bytes:
-   - PDF: must match `%PDF-` header.
-   - Images: must match PNG (`\x89PNG\r\n\x1a\n`), JPEG (`\xff\xd8\xff`), or WebP (`RIFF....WEBP`).
-   - Office: must match ZIP signature (`PK\x03\x04`) with inner OpenDocument/OOXML structure.
-3. **Page Count Inspection:** For PDFs, quickly probe page count via Poppler `pdfinfo`. Reject if pages > 200.
+- **Batas Maksimal Eksekusi:** Seluruh proses konversi dibatasi waktu maksimum **5 menit (300 detik)** menggunakan `context.WithTimeout`.
+- **Penghentian Paksa:** Jika dokumen terlalu kompleks atau biner konversi mengalami proses menggantung yang melebihi batas 5 menit, proses akan dihentikan paksa dan direktori kerja langsung dimusnahkan untuk menjaga stabilitas memori server.
+- **Batas Ukuran & Batch:** Maksimal 10 MB per berkas, maksimal 10 berkas per proses unggahan.
+- **Batas Halaman:** Maksimal 200 halaman per berkas PDF.
 
 ---
 
-## 3. Storage & Process Sandboxing
+## 3. Sandboxing & Pencegahan Eksekusi Berbahaya
 
-- **Directory Isolation:** Files exist exclusively in `/tmp/convertinaja/jobs/{job_id}/`.
-- **Non-Root Execution:** Worker processes run as an unprivileged user inside Docker (`UID 10001`).
-- **Immediate Failure Cleanup:** `defer os.RemoveAll(jobDir)` executes on any failure or cancellation signal.
-- **Strict TTL Purge:** Source files are purged immediately. Converted files older than 10 minutes are purged by the background cleaner worker.
+1. **Inspeksi Magic Bytes:** Memeriksa 512 byte pertama untuk memastikan berkas sesuai header asli (PDF `%PDF-`, PNG, JPEG, WebP, OOXML/ODF) sebelum diproses.
+2. **Pencegahan Command Injection:** Semua pemanggilan engine biner (Poppler `pdftoppm`, Ghostscript `gs`, LibreOffice `soffice`, `cwebp`) dipanggil sebagai token slice terpisah tanpa shell interpreter (`sh -c`).
+3. **Hak Akses Rendah (Least Privilege):** Biner API dan worker dijalankan menggunakan non-root user (`UID 10001` / `appuser`) di dalam container Docker.

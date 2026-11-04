@@ -56,9 +56,9 @@ func main() {
 	server := &http.Server{
 		Addr:         ":" + cfg.AppPort,
 		Handler:      router,
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 120 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		ReadTimeout:  60 * time.Second,
+		WriteTimeout: 300 * time.Second,
+		IdleTimeout:  300 * time.Second,
 	}
 
 	log.Info().

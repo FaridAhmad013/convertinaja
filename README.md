@@ -1,42 +1,47 @@
 # ConvertinAja
 
-> All your document conversions in one place.
+> **Platform Konversi Dokumen Cepat, Gratis & Nol Penyimpanan.**  
+> Ubah format PDF, Gambar, dan Office langsung dari peramban tanpa akun, tanpa pelacakan, dan dengan pemusnahan berkas seketika di server.
 
-ConvertinAja is an open-source, web-based document conversion platform. Convert documents, images, and office files without user accounts or login friction.
-
----
-
-## Architecture Overview
-
-- **Frontend:** React 19 + TypeScript + Vite + Tailwind CSS (`frontend/`)
-- **Backend:** Go 1.24+ + Chi router + Zerolog (`backend/`)
-- **Queue & Database:** Redis & PostgreSQL
-- **Conversion Engines:** Poppler, Ghostscript, LibreOffice (headless)
-- **Edge:** Nginx Reverse Proxy (`infrastructure/`)
+🌐 **Website Resmi:** [https://convertinaja.faridahmad.dev](https://convertinaja.faridahmad.dev)  
+👨‍💻 **Pengembang:** [Farid Ahmad](https://faridahmad.dev)
 
 ---
 
-## Documentation Quick Links
+## ✨ Nilai Utama ConvertinAja
 
-AI agents and contributors must refer to the documentation suite in `docs/`:
-
-- [Product Overview](docs/PRODUCT_OVERVIEW.md) — Scope, principles, and conversion matrix.
-- [AI Agent Rules](AGENTS.md) — Universal coding rules and boundaries for AI coding agents.
-- [Architecture](docs/ARCHITECTURE.md) — High-level design and component communication.
-- [Technology Stack](docs/TECH_STACK.md) — Tool versions and selection rationale.
-- [Technical Decisions (ADR)](docs/DECISIONS.md) — Architectural decision records.
-- [API Specification](docs/API_SPECIFICATION.md) — REST API endpoints and contracts.
-- [Database Schema](docs/DATABASE_SCHEMA.md) — PostgreSQL table definitions.
-- [Conversion Engine Strategy](docs/CONVERSION_ENGINE.md) — Engine CLI wrappers and sandboxing.
-- [Security Guidelines](docs/SECURITY.md) — File validation and threat mitigations.
-- [Infrastructure](docs/INFRASTRUCTURE.md) — Docker and deployment architecture.
-- [Testing Strategy](docs/TESTING.md) — Unit and integration test requirements.
-- [Current State](docs/CURRENT_STATE.md) — Project status and active phase.
+1. **Nol Penyimpanan (Zero-Storage Guarantee):**  
+   Server ConvertinAja tidak menyimpan file Anda. Berkas asli yang diunggah langsung dihapus seketika dari server saat konversi selesai atau gagal. Berkas hasil hanya berada sementara di memori server dan dihapus otomatis setelah diunduh.
+2. **Tanpa Pendaftaran Akun:**  
+   Tidak ada pembuatan akun, pengumpulan email, kata sandi, maupun profiling pengguna. Sesi anonim diamankan menggunakan token acak berumur pendek (UUID v4).
+3. **Batas Eksekusi Aman (Maksimal 5 Menit):**  
+   Untuk menjaga ketersediaan sumber daya server, proses konversi memiliki batas waktu ketat maksimal 5 menit sebelum dihentikan otomatis oleh sistem.
+4. **Kualitas Tinggi 300 DPI:**  
+   Rendering dokumen PDF ke format gambar (JPG/PNG) menghasilkan visual beresolusi tinggi yang tajam dan siap cetak.
+5. **Open Source & Terbuka:**  
+   Seluruh kode platform dilisensikan di bawah lisensi MIT.
 
 ---
 
-## Directory Guidelines for AI Agents
+## 🛠️ Mesin Konversi & Atribusi Lisensi Open-Source
 
-- [Frontend Agent Guide](frontend/AGENTS.md)
-- [Backend Agent Guide](backend/AGENTS.md)
-- [Infrastructure Agent Guide](infrastructure/AGENTS.md)
+ConvertinAja dibangun sebagai antarmuka orkestrasi web independen dan menghormati hak cipta perangkat lunak sumber terbuka:
+
+- **[Poppler Utilities](https://poppler.freedesktop.org/)** (`pdftoppm`, `pdfunite`, `pdfseparate`, `pdftotext`, `pdfimages`) — Lisensi GPLv2 / GPLv3. Dijalankan sebagai proses CLI independen tanpa modifikasi biner.
+- **[Ghostscript](https://www.ghostscript.com/)** (`gs`) — Hak Cipta Artifex Software, Inc. (Lisensi AGPLv3). Digunakan sebagai CLI subprocess untuk kompresi ukuran PDF.
+- **[LibreOffice Headless](https://www.libreoffice.org/)** (`soffice`) — Lisensi MPL-2.0 / LGPLv3+. Digunakan untuk konversi dokumen Office (Word, Excel, PowerPoint, ODT) ke PDF.
+- **[WebP Tools](https://chromium.googlesource.com/webm/libwebp)** (`cwebp`, `dwebp`) — Hak Cipta Google LLC (Lisensi BSD). Digunakan untuk encoding dan decoding gambar WebP.
+
+---
+
+## 🚀 Fitur Alat Konversi
+
+- **Alat PDF:** Gabung PDF, Pisah PDF, Kompres PDF, PDF ke JPG, PDF ke PNG, PDF ke Teks, PDF ke Markdown, PDF ke HTML, Ekstrak Gambar PDF.
+- **Alat Gambar:** JPG ke PNG, PNG ke JPG, Gambar ke WebP, WebP ke JPG, WebP ke PNG, JPG/PNG ke PDF.
+- **Alat Office Dokumen:** DOCX ke PDF, XLSX ke PDF, PPTX ke PDF, ODT ke PDF, TXT ke PDF.
+
+---
+
+## 📄 Lisensi
+
+Kode ConvertinAja dilisensikan di bawah [MIT License](LICENSE).

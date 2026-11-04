@@ -115,8 +115,8 @@ func (s *JobService) processJob(jobID, action string, inputPaths []string, optio
 	s.mu.Unlock()
 
 	jobDir := s.storage.GetJobDir(jobID)
-	// Timeout context: 120s max
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	// Timeout context: max 5 minutes (300s) to protect server resources
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
 	req := converter.ConversionJobRequest{

@@ -11,7 +11,7 @@ import { HowItWorks } from './components/HowItWorks'
 import { EditorialGuides } from './components/EditorialGuides'
 import { Footer } from './components/Footer'
 import { Toast } from './components/Toast'
-import { LegalModal, type LegalTab } from './components/LegalModal'
+import { LegalView, type LegalPageSlug } from './components/LegalView'
 import { MobileBottomNav } from './components/MobileBottomNav'
 import type { UploadedFile, ToolDefinition } from './types/conversion'
 import { validateUploadedFile } from './services/toolsCatalog'
@@ -25,9 +25,8 @@ export function App() {
   const [preferredToolId, setPreferredToolId] = useState<string | null>(null)
   const [filePickerAccept, setFilePickerAccept] = useState<string | undefined>(undefined)
 
-  // Legal Modal State (Privacy, Terms, About, Contact)
-  const [isLegalOpen, setIsLegalOpen] = useState(false)
-  const [legalTab, setLegalTab] = useState<LegalTab>('privacy')
+  // Legal View State (Dedicated Page View: privacy, terms, about, contact)
+  const [activeLegalPage, setActiveLegalPage] = useState<LegalPageSlug | null>(null)
 
   const uploadSectionRef = useRef<HTMLDivElement>(null)
   const toolSelectorRef = useRef<HTMLDivElement>(null)
@@ -192,9 +191,13 @@ export function App() {
     toolsEl?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const handleOpenLegal = (tab: LegalTab) => {
-    setLegalTab(tab)
-    setIsLegalOpen(true)
+  const handleOpenLegal = (tab: LegalPageSlug) => {
+    setActiveLegalPage(tab)
+  }
+
+  const handleBackFromLegal = () => {
+    setActiveLegalPage(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
@@ -203,9 +206,14 @@ export function App() {
         {/* 3.1 Navbar */}
         <Navbar onSelectCategory={handleCategorySelect} onOpenLegal={handleOpenLegal} />
 
-        <main className="flex-1 pb-24 sm:pb-16">
-          {/* 3.2 Hero Section */}
-          <Hero />
+        {activeLegalPage ? (
+          <main className="flex-1">
+            <LegalView initialSlug={activeLegalPage} onBack={handleBackFromLegal} />
+          </main>
+        ) : (
+          <main className="flex-1 pb-24 sm:pb-16">
+            {/* 3.2 Hero Section */}
+            <Hero />
 
           {/* 3.3 Upload Section & Conversion Experience */}
           <section
@@ -279,6 +287,7 @@ export function App() {
           {/* 3.6 Editorial Guides, Technical Guarantee & FAQ (AdSense Value Defense) */}
           <EditorialGuides />
         </main>
+        )}
 
         {/* 3.7 Footer */}
         <Footer onOpenLegal={handleOpenLegal} />
@@ -286,30 +295,26 @@ export function App() {
         {/* Mobile App Bottom Navigation Bar */}
         <MobileBottomNav
           onGoToUpload={() => {
+            if (activeLegalPage) setActiveLegalPage(null)
             uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
           }}
           onGoToPopular={() => {
+            if (activeLegalPage) setActiveLegalPage(null)
             const el = document.getElementById('popular-tools') || uploadSectionRef.current
             el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
           }}
           onGoToCatalog={() => {
+            if (activeLegalPage) setActiveLegalPage(null)
             const el = document.getElementById('tools')
             el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
           }}
           onGoToGuides={() => {
+            if (activeLegalPage) setActiveLegalPage(null)
             const el = document.getElementById('guides') || document.getElementById('faq')
             el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
           }}
           onOpenLegal={handleOpenLegal}
           hasActiveJob={Boolean(job)}
-        />
-
-        {/* Legal & Info Modal (Privacy Policy, Terms of Service, About Us, Contact) */}
-        <LegalModal
-          isOpen={isLegalOpen}
-          tab={legalTab}
-          onClose={() => setIsLegalOpen(false)}
-          onSelectTab={setLegalTab}
         />
 
         {/* Floating Feedback Toasts */}
