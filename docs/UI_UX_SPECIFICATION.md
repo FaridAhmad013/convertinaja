@@ -85,7 +85,7 @@ Homepage terdiri dari enam bagian utama:
 - When multiple files are uploaded: all valid files automatically selected.
 - Inline tools filtered strictly by compatibility with all selected files.
 - Batch download bundles outputs into ZIP if multiple; direct download if single.
-- TTL Notice: 10 minutes retention displayed with immediate raw source file deletion.
+- Zero-Storage Notice: immediate raw source file deletion and ephemeral processing displayed.
 
 ## 5. Interaction States & Acceptance Criteria
 

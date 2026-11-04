@@ -16,7 +16,7 @@ export function EditorialGuides() {
     ? [
         {
           q: 'Apakah dokumen yang saya unggah disimpan di server ConvertinAja?',
-          a: 'Sama sekali tidak. Berkas mentah yang Anda unggah langsung dimusnahkan seketika setelah proses konversi selesai. Berkas hasil konversi hanya disimpan di direktori memori sementara dan otomatis terhapus total dalam 10 menit. Tidak ada database persisten berkas.',
+          a: 'Sama sekali tidak. Berkas mentah yang Anda unggah langsung dimusnahkan seketika setelah proses konversi selesai. Berkas hasil hanya berada sementara di memori untuk diunduh dan langsung dibersihkan. Tidak ada penyimpanan berkas jangka panjang.',
         },
         {
           q: 'Berapa batasan ukuran dan jumlah berkas yang dapat dikonversi?',
@@ -31,8 +31,8 @@ export function EditorialGuides() {
           a: 'Tidak perlu. Seluruh fitur ConvertinAja 100% gratis tanpa paywall, tanpa formulir pendaftaran akun, dan tanpa langganan tersembunyi.',
         },
         {
-          q: 'Berapa lama berkas hasil konversi tersedia untuk diunduh?',
-          a: 'Berkas hasil konversi tersedia selama maksimal 10 menit. Setelah 10 menit, sistem pembersih otomatis (retention worker) akan menghapus seluruh direktori pekerjaan tanpa sisa.',
+          q: 'Bagaimana privasi berkas hasil konversi saya terlindungi?',
+          a: 'Berkas hasil konversi hanya dapat diakses melalui token rahasia acak (UUID v4) di peramban Anda. Server tidak mengarsipkan berkas dan proses pembersihan otomatis berjalan terus-menerus untuk memastikan tidak ada sisa berkas yang tertinggal.',
         },
         {
           q: 'Apakah berkas saya aman dari penggunaan pelatihan model AI?',
@@ -42,7 +42,7 @@ export function EditorialGuides() {
     : [
         {
           q: 'Are my uploaded documents stored on the server?',
-          a: 'No. Uploaded raw source files are immediately destroyed once conversion completes. Output files reside only in temporary memory and are completely wiped after 10 minutes. There is zero persistent file database.',
+          a: 'No. Uploaded raw source files are immediately destroyed once conversion completes. Output files reside only in temporary memory for your immediate download. There is zero persistent file database.',
         },
         {
           q: 'What is the maximum file size and batch limit?',
@@ -57,8 +57,8 @@ export function EditorialGuides() {
           a: 'No. Every feature on ConvertinAja is 100% free with no paywall, no signup forms, and no hidden subscriptions.',
         },
         {
-          q: 'How long are converted files available for download?',
-          a: 'Output files are available for up to 10 minutes. After 10 minutes, our automated retention worker purges the job workspace directory permanently.',
+          q: 'How is my converted file privacy protected?',
+          a: 'Output files are accessible strictly via unique random UUID v4 tokens on your browser session. Server background sweepers run continuously ensuring no remnant files linger.',
         },
         {
           q: 'Are files protected against AI scraping and training?',
@@ -162,8 +162,8 @@ export function EditorialGuides() {
           </h3>
           <p className="text-xs sm:text-sm text-[#475569] leading-relaxed mb-6">
             {isId
-              ? 'ConvertinAja tidak menggunakan penyimpanan berkas jangka panjang. Seluruh pemrosesan berjalan di direktori terisolasi sementara `/tmp/convertinaja/jobs/{uuid}`. Berkas mentah yang Anda unggah langsung dimusnahkan seketika setelah diproses. Hasil konversi otomatis dibersihkan total dalam 10 menit oleh daemon pembersih berkala.'
-              : 'ConvertinAja does not use persistent file storage. Operations occur inside an isolated temporary directory `/tmp/convertinaja/jobs/{uuid}`. Your raw uploaded files are destroyed immediately after conversion. Converted output files are automatically purged after 10 minutes.'}
+              ? 'ConvertinAja tidak menggunakan penyimpanan berkas jangka panjang. Seluruh pemrosesan berjalan di direktori terisolasi sementara `/tmp/convertinaja/jobs/{uuid}`. Berkas mentah yang Anda unggah langsung dimusnahkan seketika setelah diproses, dan sistem pembersihan otomatis memastikan ruang kerja server tetap bersih total.'
+              : 'ConvertinAja does not use persistent file storage. Operations occur inside an isolated temporary directory `/tmp/convertinaja/jobs/{uuid}`. Your raw uploaded files are destroyed immediately after conversion, and automated cleanup ensures workspaces remain spotless.'}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-[#E2E8F0]">
@@ -176,8 +176,8 @@ export function EditorialGuides() {
               <p className="text-xs text-[#64748B]">Berkas sumber langsung dihapus saat selesai.</p>
             </div>
             <div className="p-3.5 rounded-xl bg-white border border-[#E2E8F0]">
-              <span className="font-bold text-xs text-[#0F172A] block mb-0.5">Auto-Purge 10 Menit</span>
-              <p className="text-xs text-[#64748B]">Hasil konversi hilang otomatis tanpa jejak.</p>
+              <span className="font-bold text-xs text-[#0F172A] block mb-0.5">Nol Arsip Server</span>
+              <p className="text-xs text-[#64748B]">Tidak ada jejak data tertinggal di server.</p>
             </div>
           </div>
         </div>

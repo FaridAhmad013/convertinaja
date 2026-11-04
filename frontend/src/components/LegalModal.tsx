@@ -126,8 +126,8 @@ export function LegalModal({ isOpen, tab, onClose, onSelectTab }: LegalModalProp
                   </h4>
                   <p>
                     {isId
-                      ? 'Begitu proses konversi selesai (berhasil maupun gagal), berkas mentah yang Anda unggah langsung dimusnahkan seketika dari sistem tanpa jejak. Berkas hasil konversi hanya disimpan sementara di direktori memori efemeral dan otomatis dihapus permanen dalam 10 menit oleh sistem pembersih otomatis.'
-                      : 'As soon as conversion completes (success or failure), raw uploaded files are immediately shredded from the server. Converted results reside only in temporary memory and are automatically permanently wiped within 10 minutes.'}
+                      ? 'Begitu proses konversi selesai (berhasil maupun gagal), berkas mentah yang Anda unggah langsung dimusnahkan seketika dari sistem tanpa jejak. Berkas hasil konversi hanya berada di memori efemeral sementara dan langsung dibersihkan begitu proses selesai.'
+                      : 'As soon as conversion completes (success or failure), raw uploaded files are immediately shredded from the server. Converted outputs reside only in temporary ephemeral memory and are cleared promptly.'}
                   </p>
                 </div>
 
