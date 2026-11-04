@@ -478,18 +478,19 @@ export function ConversionStatus({
       {/* COMPLETED: Single File View */}
       {isCompleted && !isMultiFile && (
         <div className="space-y-6 pt-2">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* Action Button Grid: Clean, consistent height, centered, and aligned */}
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch justify-center gap-3 max-w-4xl mx-auto">
             {/* Primary Download Button */}
             {job.downloadUrl && (
               <a
                 href={job.downloadUrl}
                 download
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-base shadow-md hover:shadow-lg transition-all scale-[1.01] cursor-pointer"
+                className="flex-1 min-w-[200px] inline-flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-sm shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
               >
-                <Download className="w-5 h-5 stroke-[2.5]" />
+                <Download className="w-4 h-4 stroke-[2.5]" />
                 <span>{t.status.downloadButton}</span>
                 {job.fileSize && (
-                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded-md font-semibold">
+                  <span className="text-[11px] bg-white/20 px-2 py-0.5 rounded-md font-semibold tracking-wide">
                     {formatBytes(job.fileSize)}
                   </span>
                 )}
@@ -501,10 +502,10 @@ export function ConversionStatus({
               <button
                 type="button"
                 onClick={onConvertSameFile}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] font-bold text-sm transition-all cursor-pointer shadow-2xs"
+                className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] font-semibold text-xs sm:text-sm transition-all cursor-pointer shadow-2xs whitespace-nowrap"
               >
-                <ArrowLeftRight className="w-4 h-4" />
-                <span>{isId ? 'Konversi Berkas Ini ke Format Lain' : 'Convert File to Other Format'}</span>
+                <ArrowLeftRight className="w-4 h-4 text-[#2563EB]" />
+                <span>{isId ? 'Ubah Format Lain' : 'Convert File to Other Format'}</span>
               </button>
             )}
 
@@ -513,10 +514,10 @@ export function ConversionStatus({
               <button
                 type="button"
                 onClick={onConvertResultFile}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-sm transition-all cursor-pointer shadow-2xs"
+                className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-xs sm:text-sm transition-all cursor-pointer shadow-2xs whitespace-nowrap"
               >
                 <Sparkles className="w-4 h-4 text-emerald-600" />
-                <span>{isId ? 'Lanjut Konversi Berkas Hasil' : 'Chain-Convert Result'}</span>
+                <span>{isId ? 'Lanjut Konversi Hasil' : 'Chain-Convert Result'}</span>
               </button>
             )}
 
@@ -524,7 +525,7 @@ export function ConversionStatus({
             <button
               type="button"
               onClick={onReset}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-[#E2E8F0] bg-slate-50 hover:bg-slate-100 text-[#0F172A] font-semibold text-sm transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#CBD5E1] bg-white hover:bg-slate-50 text-[#0F172A] font-semibold text-xs sm:text-sm transition-all cursor-pointer shadow-2xs whitespace-nowrap"
             >
               <PlusCircle className="w-4 h-4 text-[#2563EB]" />
               <span>{t.status.convertAgain}</span>
