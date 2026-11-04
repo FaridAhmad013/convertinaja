@@ -1,18 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  ShieldCheck,
-  FileText,
-  Info,
-  Mail,
-  ArrowLeft,
-  CheckCircle2,
-  Lock,
-  ServerOff,
-  Code2,
-  ExternalLink,
-  Clock,
-  Trash2,
-} from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useI18n } from '../i18n'
 
 export type LegalPageSlug = 'privacy' | 'terms' | 'about' | 'contact'
@@ -31,375 +18,469 @@ export function LegalView({ initialSlug, onBack }: LegalViewProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [activeSlug])
 
-  const navItems = [
-    { slug: 'privacy' as LegalPageSlug, label: isId ? 'Kebijakan Privasi' : 'Privacy Policy', icon: ShieldCheck },
-    { slug: 'terms' as LegalPageSlug, label: isId ? 'Syarat & Ketentuan' : 'Terms of Service', icon: FileText },
-    { slug: 'about' as LegalPageSlug, label: isId ? 'Tentang & Lisensi' : 'About & Licenses', icon: Info },
-    { slug: 'contact' as LegalPageSlug, label: isId ? 'Hubungi Kami' : 'Contact', icon: Mail },
+  const tabs: { slug: LegalPageSlug; label: string }[] = [
+    { slug: 'privacy', label: isId ? 'Kebijakan Privasi' : 'Privacy Policy' },
+    { slug: 'terms', label: isId ? 'Persyaratan Layanan' : 'Terms of Service' },
+    { slug: 'about', label: isId ? 'Tentang & Lisensi' : 'About & Licenses' },
+    { slug: 'contact', label: isId ? 'Kontak' : 'Contact' },
   ]
 
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] py-8 sm:py-12">
-      <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Navigation & Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E2E8F0]">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#CBD5E1] bg-white hover:bg-slate-50 text-xs sm:text-sm font-semibold text-[#0F172A] transition-colors cursor-pointer shadow-2xs w-fit"
-          >
-            <ArrowLeft className="w-4 h-4 text-[#2563EB]" />
-            <span>{isId ? 'Kembali ke Beranda' : 'Back to Home'}</span>
-          </button>
+  // Table of Contents per active page
+  const privacyToc = isId
+    ? [
+        { id: 'pengantar', label: 'Pengantar' },
+        { id: 'tanpa-retensi', label: 'Pemusnahan Berkas Seketika' },
+        { id: 'tanpa-akun', label: 'Bebas Akun & Anonim' },
+        { id: 'keamanan-data', label: 'Keamanan Pemrosesan' },
+        { id: 'iklan-analitik', label: 'Iklan Pihak Ketiga' },
+        { id: 'kontak-privasi', label: 'Kontak Privasi' },
+      ]
+    : [
+        { id: 'pengantar', label: 'Introduction' },
+        { id: 'tanpa-retensi', label: 'Instant File Destruction' },
+        { id: 'tanpa-akun', label: 'Account-Free & Anonymous' },
+        { id: 'keamanan-data', label: 'Processing Security' },
+        { id: 'iklan-analitik', label: 'Third-Party Advertising' },
+        { id: 'kontak-privasi', label: 'Privacy Contact' },
+      ]
 
-          {/* Quick Tab Selector */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-            {navItems.map((item) => {
-              const Icon = item.icon
-              const isActive = activeSlug === item.slug
+  const termsToc = isId
+    ? [
+        { id: 'ketentuan-umum', label: 'Penerimaan Ketentuan' },
+        { id: 'batasan-penggunaan', label: 'Batasan Penggunaan' },
+        { id: 'limit-sistem', label: 'Batas Teknis & 5 Menit' },
+        { id: 'hak-kekayaan', label: 'Kepemilikan Berkas' },
+        { id: 'penafian', label: 'Penafian Tanggung Jawab' },
+      ]
+    : [
+        { id: 'ketentuan-umum', label: 'Acceptance of Terms' },
+        { id: 'batasan-penggunaan', label: 'Acceptable Use' },
+        { id: 'limit-sistem', label: 'Technical & 5-Min Limit' },
+        { id: 'hak-kekayaan', label: 'Intellectual Property' },
+        { id: 'penafian', label: 'Disclaimer of Warranties' },
+      ]
+
+  const aboutToc = isId
+    ? [
+        { id: 'mengenai-kami', label: 'Tentang ConvertinAja' },
+        { id: 'lisensi-foss', label: 'Atribusi & Lisensi Mesin' },
+        { id: 'arsitektur-transparan', label: 'Arsitektur Efemeral' },
+      ]
+    : [
+        { id: 'mengenai-kami', label: 'About ConvertinAja' },
+        { id: 'lisensi-foss', label: 'Engine Attribution & Licenses' },
+        { id: 'arsitektur-transparan', label: 'Ephemeral Architecture' },
+      ]
+
+  const contactToc = isId
+    ? [
+        { id: 'saluran-kontak', label: 'Hubungi Kami' },
+        { id: 'laporan-bug', label: 'Pelaporan Masalah' },
+      ]
+    : [
+        { id: 'saluran-kontak', label: 'Contact Us' },
+        { id: 'laporan-bug', label: 'Bug Reports' },
+      ]
+
+  const currentToc =
+    activeSlug === 'privacy'
+      ? privacyToc
+      : activeSlug === 'terms'
+        ? termsToc
+        : activeSlug === 'about'
+          ? aboutToc
+          : contactToc
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  return (
+    <div className="w-full bg-white text-[#0F172A]">
+      {/* 1. Header Bar: Brand Context, Back Action & Horizontal Navigation Tabs (Google Privacy style) */}
+      <div className="border-b border-[#E2E8F0] sticky top-16 z-30 bg-white/95 backdrop-blur-xs">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-3">
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>{isId ? 'Kembali ke Beranda' : 'Back to Home'}</span>
+            </button>
+
+            <span className="text-xs text-[#94A3B8] hidden sm:inline">
+              ConvertinAja &bull; {isId ? 'Privasi & Persyaratan' : 'Privacy & Terms'}
+            </span>
+          </div>
+
+          {/* Underline Tabs */}
+          <nav className="flex space-x-8 overflow-x-auto no-scrollbar -mb-px">
+            {tabs.map((tab) => {
+              const isActive = activeSlug === tab.slug
               return (
                 <button
-                  key={item.slug}
+                  key={tab.slug}
                   type="button"
-                  onClick={() => setActiveSlug(item.slug)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  onClick={() => setActiveSlug(tab.slug)}
+                  className={`py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
                     isActive
-                      ? 'bg-[#2563EB] text-white shadow-2xs'
-                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-200/60'
+                      ? 'border-[#2563EB] text-[#2563EB]'
+                      : 'border-transparent text-[#64748B] hover:text-[#0F172A] hover:border-slate-300'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label}</span>
+                  {tab.label}
                 </button>
               )
             })}
-          </div>
+          </nav>
         </div>
+      </div>
 
-        {/* Content Card */}
-        <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xs p-6 sm:p-10 space-y-8 text-sm sm:text-base leading-relaxed">
-          {/* ==================================================== */}
-          {/* 1. PRIVACY POLICY */}
-          {/* ==================================================== */}
-          {activeSlug === 'privacy' && (
-            <article className="space-y-6">
-              <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200/60">
-                  {isId ? 'Kebijakan Privasi Resmi' : 'Official Privacy Policy'}
-                </span>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0F172A]">
-                  {isId ? 'Kebijakan Privasi (Zero Data Retention)' : 'Privacy Policy (Zero Data Retention)'}
-                </h1>
-                <p className="text-xs sm:text-sm text-[#64748B]">
-                  {isId ? 'Terakhir diperbarui: Maret 2026 • Kebijakan Tanpa Kompromi' : 'Last updated: March 2026 • Strict Zero-Storage'}
-                </p>
-              </div>
+      {/* 2. Main Two-Column Layout: Left Sticky Outline (TOC) & Right Clean Editorial Content */}
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+          {/* Left Column: Minimal Clean TOC Sidebar (Desktop) */}
+          <aside className="hidden lg:block lg:col-span-3">
+            <div className="sticky top-36 space-y-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
+                {isId ? 'Daftar Isi' : 'On this page'}
+              </span>
+              <ul className="space-y-2 text-sm text-[#64748B]">
+                {currentToc.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => scrollToSection(item.id)}
+                      className="text-left hover:text-[#2563EB] transition-colors cursor-pointer block py-0.5"
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
 
-              {/* Box Pernyataan Utama */}
-              <div className="p-5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-emerald-950 space-y-2">
-                <div className="flex items-center gap-2 font-bold text-sm text-emerald-900">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span>
-                    {isId
-                      ? 'Pernyataan Resmi: Kami Tidak Menyimpan Maupun Membaca Dokumen Anda'
-                      : 'Official Statement: We Do Not Store Or Read Your Documents'}
+          {/* Right Column: Editorial Body Text */}
+          <article className="lg:col-span-9 max-w-3xl space-y-12">
+            {/* === PRIVACY POLICY === */}
+            {activeSlug === 'privacy' && (
+              <>
+                <header className="space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB]">
+                    {isId ? 'Kebijakan Privasi ConvertinAja' : 'ConvertinAja Privacy Policy'}
                   </span>
-                </div>
-                <p className="text-xs sm:text-sm text-emerald-900/90 leading-relaxed">
-                  {isId
-                    ? 'ConvertinAja dibangun atas prinsip dasar Nol-Penyimpanan (Zero-Storage). Berkas Anda bukan komoditas kami. Kami tidak pernah mengarsipkan, tidak menjual, tidak memprofiling, dan tidak pernah menggunakan dokumen Anda untuk pelatihan model kecerdasan buatan (AI).'
-                    : 'ConvertinAja is built on Zero-Storage principles. Your files are not our product. We never archive, sell, profile, or use your documents to train artificial intelligence models.'}
-                </p>
-              </div>
-
-              {/* Poin-Poin Kebijakan */}
-              <div className="space-y-6 pt-2 text-[#334155]">
-                <section className="space-y-2">
-                  <h2 className="text-base sm:text-lg font-bold text-[#0F172A] flex items-center gap-2">
-                    <Trash2 className="w-5 h-5 text-[#2563EB]" />
-                    <span>{isId ? '1. Pemusnahan Berkas Seketika di Sisi Server' : '1. Instant Source File Destruction on Server'}</span>
-                  </h2>
-                  <p className="text-xs sm:text-sm leading-relaxed">
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
                     {isId
-                      ? 'Begitu proses konversi selesai (baik berstatus berhasil maupun gagal), berkas mentah asli yang Anda unggah langsung dimusnahkan secara permanen dari server tanpa jejak. Berkas hasil konversi hanya berada di memori efemeral sementara untuk diunduh oleh Anda dan akan langsung dibersihkan otomatis begitu proses selesai.'
-                      : 'As soon as conversion finishes (success or failure), raw uploaded source files are immediately and permanently shredded from the server. Converted outputs reside purely in ephemeral memory for your download and are cleared immediately once retrieved.'}
+                      ? 'Privasi Anda adalah fondasi utama arsitektur kami, bukan sekadar janji tertulis.'
+                      : 'Your privacy is the core architecture of our platform, not an afterthought.'}
+                  </h1>
+                  <p className="text-base text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'ConvertinAja dirancang sejak baris kode pertama untuk tidak menyimpan dokumen Anda. Kami tidak memiliki basis data pengguna, tidak menyimpan berkas secara permanen, dan tidak memperdagangkan data dokumen Anda kepada pihak mana pun.'
+                      : 'ConvertinAja is built from the ground up to never retain your documents. We operate zero persistent databases for user files, gather zero personal identities, and never share or monetize your information.'}
+                  </p>
+                </header>
+
+                <hr className="border-[#E2E8F0]" />
+
+                <section id="pengantar" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '1. Pengantar' : '1. Introduction'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Kebijakan Privasi ini menjelaskan bagaimana platform ConvertinAja memperlakukan dokumen yang Anda unggah dan informasi teknis yang terjadi selama proses konversi dokumen berlangsung.'
+                      : 'This Privacy Policy explains how ConvertinAja handles documents you upload and technical metadata created during conversions.'}
                   </p>
                 </section>
 
-                <section className="space-y-2">
-                  <h2 className="text-base sm:text-lg font-bold text-[#0F172A] flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-[#2563EB]" />
-                    <span>{isId ? '2. Tanpa Akun, Tanpa Profiling & Tanpa Database Pengguna' : '2. No Accounts, No Profiling & No User Database'}</span>
+                <section id="tanpa-retensi" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '2. Pemusnahan Berkas Mentah Seketika (Zero Retention)' : '2. Instant Raw File Destruction'}
                   </h2>
-                  <p className="text-xs sm:text-sm leading-relaxed">
+                  <p className="text-sm text-[#475569] leading-relaxed">
                     {isId
-                      ? 'Layanan ConvertinAja tidak memiliki registrasi akun, formulir pendaftaran, maupun basis data pengguna. Setiap sesi bersifat anonim. Tautan unduhan dilindungi oleh token acak berumur pendek (UUID v4) yang hanya diketahui oleh peramban Anda.'
-                      : 'ConvertinAja does not feature user registrations, logins, or user databases. Every session is anonymous. Download links are gated via cryptographically random UUID v4 tokens known exclusively to your browser session.'}
+                      ? 'Begitu proses konversi dokumen selesai (baik berhasil maupun gagal), berkas mentah asli yang Anda unggah langsung dimusnahkan secara permanen dari server melalui fungsi penghapusan sistem berkas tingkat rendah (os.Remove). Server kami tidak mengarsipkan salinan cadangan.'
+                      : 'As soon as conversion finishes (success or failure), original uploaded raw files are immediately and permanently erased using low-level filesystem removal (os.Remove). We keep zero backups.'}
+                  </p>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Hasil konversi ditempatkan sementara pada memori efemeral terisolasi agar dapat Anda unduh. Sistem pembersih otomatis (fail-safe sweeper) berjalan secara berkala untuk memastikan tidak ada artefak berkas yang tertinggal pada media penyimpanan.'
+                      : 'Converted output files reside temporarily in isolated ephemeral memory for your download. Background sweepers run continuously as a fail-safe to guarantee zero leftover files.'}
                   </p>
                 </section>
 
-                <section className="space-y-2">
-                  <h2 className="text-base sm:text-lg font-bold text-[#0F172A] flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-[#2563EB]" />
-                    <span>{isId ? '3. Batas Waktu Proses Maksimal 5 Menit' : '3. 5-Minute Maximum Execution Hard Limit'}</span>
+                <section id="tanpa-akun" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '3. Bebas Akun & Anonim' : '3. Account-Free & Fully Anonymous'}
                   </h2>
-                  <p className="text-xs sm:text-sm leading-relaxed">
+                  <p className="text-sm text-[#475569] leading-relaxed">
                     {isId
-                      ? 'Untuk mencegah beban berlebih dan menjaga kestabilan sumber daya server, setiap proses konversi dibatasi waktu maksimal 5 menit (300 detik). Proses yang melampaui batas ini akan otomatis dihentikan paksa oleh sistem dan seluruh berkas terkait langsung dihapus.'
-                      : 'To prevent resource starvation and maintain VPS server stability, all conversion jobs are bound to a strict 5-minute (300s) hard limit. Any process exceeding this duration is forcefully terminated and associated files are shredded.'}
+                      ? 'ConvertinAja tidak menyediakan pendaftaran akun, formulir login, atau pengumpulan data pribadi (nama, alamat email, atau nomor telepon). Sesi kerja Anda diidentifikasi hanya dengan token acak kriptografis (UUID v4) berumur pendek di peramban.'
+                      : 'ConvertinAja requires no signups, logins, or personal details (such as names, emails, or phone numbers). Your session is authorized purely through short-lived cryptographic UUID v4 tokens on your browser.'}
                   </p>
                 </section>
 
-                <section className="space-y-2">
-                  <h2 className="text-base sm:text-lg font-bold text-[#0F172A] flex items-center gap-2">
-                    <ServerOff className="w-5 h-5 text-[#2563EB]" />
-                    <span>{isId ? '4. Pembersihan Darurat Terjadwal (Fail-safe Sweep)' : '4. Automated Fail-safe Sweeps'}</span>
+                <section id="keamanan-data" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '4. Keamanan Pemrosesan & Transmisi' : '4. Processing & Transmission Security'}
                   </h2>
-                  <p className="text-xs sm:text-sm leading-relaxed">
+                  <p className="text-sm text-[#475569] leading-relaxed">
                     {isId
-                      ? 'Sistem pembersih otomatis berjalan setiap saat di latar belakang semata-mata sebagai jaring pengaman (fail-safe) untuk skenario tak terduga (seperti koneksi internet pengguna terputus di tengah proses) agar direktori kerja sementara selalu bersih dari berkas tertinggal.'
-                      : 'Automated background sweeps operate continuously purely as a safety net for edge-case failures (such as client network drops mid-conversion) ensuring no orphan files linger on disk.'}
-                  </p>
-                </section>
-              </div>
-            </article>
-          )}
-
-          {/* ==================================================== */}
-          {/* 2. TERMS OF SERVICE */}
-          {/* ==================================================== */}
-          {activeSlug === 'terms' && (
-            <article className="space-y-6">
-              <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200/60">
-                  {isId ? 'Ketentuan Layanan Resmi' : 'Terms of Service'}
-                </span>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0F172A]">
-                  {isId ? 'Syarat & Ketentuan Penggunaan' : 'Terms of Service'}
-                </h1>
-                <p className="text-xs sm:text-sm text-[#64748B]">
-                  {isId ? 'Berlaku untuk seluruh pengunjung dan pengguna platform ConvertinAja' : 'Applicable to all visitors and users of ConvertinAja'}
-                </p>
-              </div>
-
-              <div className="space-y-6 pt-2 text-[#334155] text-xs sm:text-sm leading-relaxed">
-                <section className="space-y-2">
-                  <h2 className="text-base sm:text-lg font-bold text-[#0F172A]">
-                    {isId ? '1. Kepemilikan Dokumen & Hak Cipta' : '1. Document Ownership & Intellectual Property'}
-                  </h2>
-                  <p>
-                    {isId
-                      ? 'Hak cipta, kepemilikan intelektual, dan isi dari seluruh berkas yang Anda unggah sepenuhnya tetap berada di tangan Anda. ConvertinAja tidak memiliki hak kepemilikan, lisensi sekunder, maupun klaim apa pun atas dokumen Anda.'
-                      : 'You retain 100% intellectual property rights, copyright, and ownership over any files you process. ConvertinAja asserts zero ownership, secondary licensing, or proprietary claims over your documents.'}
+                      ? 'Seluruh lalu lintas transmisi antara peramban Anda dan server dienkripsi menggunakan protokol standar HTTPS (TLS 1.3). Pemrosesan biner konversi dijalankan di dalam container terisolasi tanpa akses interpreter shell eksternal.'
+                      : 'All data in transit between your browser and our server is secured using modern TLS 1.3 encryption. Conversion execution runs inside isolated container sandboxes without external shell interpretation.'}
                   </p>
                 </section>
 
-                <section className="space-y-2">
-                  <h2 className="text-base sm:text-lg font-bold text-[#0F172A]">
-                    {isId ? '2. Kebijakan Batasan Penggunaan Wajar (Fair Use)' : '2. Fair Use & Capacity Boundaries'}
+                <section id="iklan-analitik" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '5. Iklan Pihak Ketiga & Cookie' : '5. Third-Party Advertising & Cookies'}
                   </h2>
-                  <ul className="list-disc pl-5 space-y-1.5">
-                    <li>
-                      <strong>{isId ? 'Batas Ukuran:' : 'Size Cap:'}</strong> {isId ? 'Maksimal 10 MB per berkas.' : 'Maximum 10 MB per individual file.'}
-                    </li>
-                    <li>
-                      <strong>{isId ? 'Batas Batch:' : 'Batch Limit:'}</strong> {isId ? 'Maksimal 10 berkas dalam satu proses unggah.' : 'Maximum 10 files per conversion batch.'}
-                    </li>
-                    <li>
-                      <strong>{isId ? 'Batas Waktu Komputasi:' : 'Computation Ceiling:'}</strong> {isId ? 'Proses konversi yang membutuhkan waktu lebih dari 5 menit akan otomatis dihentikan untuk menjaga kestabilan server.' : 'Any task requiring longer than 5 minutes will be forcefully terminated to preserve server capacity.'}
-                    </li>
-                    <li>
-                      <strong>{isId ? 'Larangan Konten:' : 'Prohibited Content:'}</strong> {isId ? 'Dilarang mengunggah malware, executable berbahaya, arsip beracun (zip-bomb), atau berkas yang melanggar hukum.' : 'You must not upload malware, malicious binaries, decompression bombs, or unlawful material.'}
-                    </li>
-                  </ul>
-                </section>
-
-                <section className="space-y-2">
-                  <h2 className="text-base sm:text-lg font-bold text-[#0F172A]">
-                    {isId ? '3. Ketiadaan Garansi & Batasan Tanggung Jawab (As-Is)' : '3. Disclaimer of Warranties & Limitation of Liability'}
-                  </h2>
-                  <p>
+                  <p className="text-sm text-[#475569] leading-relaxed">
                     {isId
-                      ? 'Platform ini disediakan secara gratis atas dasar "sebagaimana adanya" (as-is) tanpa jaminan ketersediaan tanpa henti atau kecocokan untuk tujuan tertentu. Pengembang tidak bertanggung jawab atas kehilangan data, kerusakan sistem, atau kerugian tidak langsung yang timbul akibat penggunaan layanan ini.'
-                      : 'This platform is delivered free of charge on an "as-is" basis without warranties of uninterrupted uptime or fitness for a particular purpose. Developers are not liable for direct, indirect, or consequential damages resulting from platform use.'}
+                      ? 'Untuk menjaga kelangsungan operasional server gratis, kami dapat menayangkan iklan melalui jaringan resmi seperti Google AdSense. Google dapat menggunakan cookie untuk menayangkan iklan berdasarkan kunjungan Anda ke situs ini atau situs web lain di internet. Anda dapat mengelola preferensi iklan melalui setelan Google Ads Settings.'
+                      : 'To sustain server hosting costs, we may serve advertisements via certified providers like Google AdSense. Google may utilize cookies to serve ads based on prior web visits. You can customize cookie preferences via Google Ads Settings.'}
                   </p>
                 </section>
-              </div>
-            </article>
-          )}
 
-          {/* ==================================================== */}
-          {/* 3. ABOUT & LICENSES */}
-          {/* ==================================================== */}
-          {activeSlug === 'about' && (
-            <article className="space-y-6">
-              <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200/60">
-                  {isId ? 'Transparansi Penuh' : 'Full Transparency'}
-                </span>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0F172A]">
-                  {isId ? 'Tentang Platform & Atribusi Lisensi Open-Source' : 'About Platform & Open-Source Licenses'}
-                </h1>
-                <p className="text-xs sm:text-sm text-[#64748B]">
-                  {isId ? 'Pernyataan keterbukaan dan kepatuhan lisensi perangkat lunak sumber terbuka (FOSS)' : 'Commitment to open-source software (FOSS) attribution and integrity'}
-                </p>
-              </div>
-
-              <div className="space-y-4 pt-1 text-[#334155] text-xs sm:text-sm leading-relaxed">
-                <p>
-                  {isId
-                    ? 'ConvertinAja adalah platform antarmuka web (web wrapper interface) gratis dan open-source yang dirancang untuk mempermudah alur konversi dokumen harian tanpa iklan mengganggu, tanpa paywall, dan dengan penghormatan tertinggi terhadap privasi pengguna.'
-                    : 'ConvertinAja is an open-source web wrapper interface designed to simplify daily document conversions without invasive paywalls, forced signups, or data tracking.'}
-                </p>
-
-                {/* Developer Credit Box */}
-                <div className="p-4 rounded-xl bg-slate-50 border border-[#E2E8F0] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <span className="text-xs text-[#64748B] block font-medium">{isId ? 'Inisiator & Pengembang' : 'Author & Developer'}</span>
-                    <strong className="text-base text-[#0F172A]">Farid Ahmad</strong>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href="https://faridahmad.dev"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-blue-100 text-xs font-semibold text-[#2563EB] transition-colors"
-                    >
-                      <span>Portofolio</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                    <a
-                      href="https://www.linkedin.com/in/faridahmad013"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#CBD5E1] bg-white hover:bg-slate-50 text-xs font-semibold text-[#0A66C2] transition-colors"
-                    >
-                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.6 1.6 0 0 0-1.6 1.6 1.6 1.6 0 0 0 1.6 1.6 1.6 1.6 0 0 0 1.6-1.6 1.6 1.6 0 0 0-1.6-1.6Z" />
-                      </svg>
-                      <span>LinkedIn</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Legal & Open Source Engines Attribution */}
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center gap-2 font-bold text-sm text-[#0F172A]">
-                    <Code2 className="w-5 h-5 text-[#2563EB]" />
-                    <span>{isId ? 'Atribusi Mesin & Lisensi Pihak Ketiga' : 'Engine Attributions & Open-Source Licenses'}</span>
-                  </div>
-                  <p className="text-xs text-[#64748B]">
+                <section id="kontak-privasi" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '6. Kontak Privasi' : '6. Privacy Contact'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
                     {isId
-                      ? 'ConvertinAja tidak mengklaim kepemilikan atas perangkat lunak mesin konversi asli. Seluruh biner dijalankan sebagai proses CLI terpisah (subprocess) tanpa modifikasi kode:'
-                      : 'ConvertinAja asserts zero proprietary authorship over the underlying conversion engines. All engines are invoked as unmodified discrete CLI subprocesses:'}
+                      ? 'Jika Anda memiliki pertanyaan mengenai penanganan privasi atau kepatuhan data pada platform ini, silakan hubungi pengembang melalui email faridahmad013@gmail.com.'
+                      : 'For inquiries regarding data privacy compliance, reach out to the developer at faridahmad013@gmail.com.'}
+                  </p>
+                </section>
+              </>
+            )}
+
+            {/* === TERMS OF SERVICE === */}
+            {activeSlug === 'terms' && (
+              <>
+                <header className="space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB]">
+                    {isId ? 'Persyaratan Layanan ConvertinAja' : 'ConvertinAja Terms of Service'}
+                  </span>
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
+                    {isId
+                      ? 'Ketentuan penggunaan platform konversi dokumen ConvertinAja.'
+                      : 'Terms governing your use of ConvertinAja conversion utility.'}
+                  </h1>
+                  <p className="text-base text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Dengan mengakses atau menggunakan platform ini, Anda menyetujui persyaratan berikut. Kami menyajikan panduan ini secara transparan tanpa syarat tersembunyi.'
+                      : 'By accessing or using ConvertinAja, you agree to these clear, transparent terms.'}
+                  </p>
+                </header>
+
+                <hr className="border-[#E2E8F0]" />
+
+                <section id="ketentuan-umum" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '1. Penerimaan Ketentuan' : '1. Acceptance of Terms'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'ConvertinAja disediakan untuk penggunaan perorangan dan profesional tanpa pungutan biaya langganan. Penggunaan platform harus mematuhi seluruh hukum yang berlaku di yurisdiksi Anda.'
+                      : 'ConvertinAja is provided free of charge for personal and commercial usage. You must comply with all applicable local and international laws.'}
+                  </p>
+                </section>
+
+                <section id="batasan-penggunaan" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '2. Batasan Penggunaan Berkas' : '2. Acceptable Use'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Anda bertanggung jawab penuh atas dokumen yang Anda unggah. Pengguna dilarang mengunggah konten yang melanggar hukum, malware, materi berhak cipta tanpa izin, atau berkas berbahaya lainnya.'
+                      : 'You retain sole responsibility for files submitted. Uploading malicious binaries, unlicensed copyrighted media, or unlawful content is strictly prohibited.'}
+                  </p>
+                </section>
+
+                <section id="limit-sistem" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '3. Batas Teknis & Batas Waktu 5 Menit' : '3. Technical Ceilings & 5-Minute Limit'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Untuk menjaga stabilitas performa server, batas ukuran berkas adalah maksimal 10 MB per berkas dengan batas antrean hingga 10 berkas. Setiap proses konversi terikat pada batas waktu maksimal 5 menit (300 detik). Proses yang melampaui 5 menit akan otomatis dihentikan paksa (SIGKILL) dan berkas terkait langsung dihapus.'
+                      : 'To guarantee server stability, uploads are limited to 10 MB per file and max 10 files per batch. Each job is bound to a strict 5-minute (300-second) timeout. Processes exceeding 5 minutes are forcefully terminated (SIGKILL) and files erased.'}
+                  </p>
+                </section>
+
+                <section id="hak-kekayaan" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '4. Kepemilikan Hak Cipta Dokumen' : '4. Intellectual Property Rights'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'ConvertinAja tidak mengklaim hak kepemilikan atas berkas yang Anda konversi. Seluruh hak kekayaan intelektual atas dokumen sumber dan hasil konversi tetap menjadi milik Anda sepenuhnya.'
+                      : 'ConvertinAja claims zero ownership or rights over your documents. All intellectual property remains exclusively yours.'}
+                  </p>
+                </section>
+
+                <section id="penafian" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '5. Penafian Tanggung Jawab' : '5. Disclaimer of Warranties'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Layanan ini disediakan "sebagaimana adanya" (as-is) tanpa jaminan ketersediaan mutlak tanpa henti. Pengembang tidak bertanggung jawab atas kegagalan konversi atau kerusakan dokumen akibat berkas sumber yang korup atau rusak.'
+                      : 'The service is provided "as is" without warranties of uninterrupted availability. We are not liable for failed conversions stemming from corrupted input files.'}
+                  </p>
+                </section>
+              </>
+            )}
+
+            {/* === ABOUT & LICENSES === */}
+            {activeSlug === 'about' && (
+              <>
+                <header className="space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB]">
+                    {isId ? 'Tentang ConvertinAja & Lisensi FOSS' : 'About ConvertinAja & FOSS Licenses'}
+                  </span>
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
+                    {isId
+                      ? 'Dibangun di atas ekosistem open-source yang teruji dan transparan.'
+                      : 'Built on top of proven, transparent open-source foundations.'}
+                  </h1>
+                  <p className="text-base text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'ConvertinAja dikembangkan oleh Farid Ahmad sebagai antarmuka web modern yang cepat dan aman untuk mempermudah konversi dokumen sehari-hari.'
+                      : 'ConvertinAja was developed by Farid Ahmad as a fast, secure web wrapper making daily document conversion accessible to everyone.'}
+                  </p>
+                </header>
+
+                <hr className="border-[#E2E8F0]" />
+
+                <section id="mengenai-kami" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '1. Tentang Proyek' : '1. About the Project'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Banyak layanan konversi dokumen online mengharuskan pengguna mendaftar, membayar langganan, atau membiarkan berkas mereka tersimpan berjam-jam di server pihak ketiga. ConvertinAja hadir sebagai alternatif open-source: tanpa pendaftaran akun, tanpa paywall, dan berkas langsung musnah setelah diproses.'
+                      : 'Many web converters require paid plans, account registration, or store user files indefinitely. ConvertinAja exists as an open-source alternative: no accounts, no subscriptions, and instant file destruction.'}
+                  </p>
+                </section>
+
+                <section id="lisensi-foss" className="space-y-4 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '2. Atribusi Mesin & Lisensi Perangkat Lunak' : '2. Engine Attribution & FOSS Licenses'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'ConvertinAja mengeksekusi mesin konversi open-source standar industri melalui panggilan subproses mandiri (CLI subprocess) tanpa memodifikasi kode sumber mesin tersebut:'
+                      : 'ConvertinAja leverages battle-tested open-source conversion engines via isolated CLI subprocess execution without proprietary source linking:'}
                   </p>
 
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#0F172A] text-xs sm:text-sm">Poppler Utilities (`pdftoppm`, `pdfunite`, `pdftotext`, `pdfimages`)</span>
-                        <span className="text-[11px] px-2 py-0.5 rounded bg-blue-100 text-[#1D4ED8] font-bold">GPLv2 / GPLv3</span>
-                      </div>
-                      <p className="text-xs text-[#64748B]">
-                        {isId
-                          ? 'Dikembangkan oleh freedesktop.org & kontributor Xpdf. Digunakan untuk perenderan PDF resolusi tinggi (300 DPI HD), penggabungan dokumen, ekstraksi halaman, dan konversi teks.'
-                          : 'Developed by freedesktop.org & Xpdf contributors. Used for high-definition 300 DPI PDF rendering, merging, extraction, and text conversion.'}
+                  <div className="space-y-3 pt-2">
+                    <div className="p-4 rounded-xl border border-[#E2E8F0] bg-slate-50">
+                      <div className="font-bold text-sm text-[#0F172A]">Poppler Utilities (pdftoppm, pdfinfo)</div>
+                      <p className="text-xs text-[#64748B] mt-1">
+                        Lisensi: GNU General Public License v2 / v3 (GPLv2/GPLv3). Digunakan untuk rendering PDF ke gambar beresolusi tinggi 300 DPI.
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#0F172A] text-xs sm:text-sm">Ghostscript (`gs`)</span>
-                        <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">AGPLv3</span>
-                      </div>
-                      <p className="text-xs text-[#64748B]">
-                        {isId
-                          ? 'Hak Cipta Artifex Software, Inc. Digunakan sebagai mesin biner baris perintah mandiri untuk kompresi ukuran PDF tanpa tautan pustaka dinamis/statis.'
-                          : 'Copyright Artifex Software, Inc. Invoked strictly as an external command-line binary for PDF compression without static or dynamic code linkage.'}
+                    <div className="p-4 rounded-xl border border-[#E2E8F0] bg-slate-50">
+                      <div className="font-bold text-sm text-[#0F172A]">Ghostscript (gs)</div>
+                      <p className="text-xs text-[#64748B] mt-1">
+                        Lisensi: GNU Affero General Public License (AGPLv3). Digunakan untuk kompresi dan optimasi berkas PDF.
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#0F172A] text-xs sm:text-sm">LibreOffice Headless (`soffice`)</span>
-                        <span className="text-[11px] px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">MPL-2.0 / LGPLv3+</span>
-                      </div>
-                      <p className="text-xs text-[#64748B]">
-                        {isId
-                          ? 'Hak Cipta The Document Foundation. Dijalankan dalam mode headless terisolasi untuk konversi dokumen Office (DOCX, PPTX, XLSX, ODT, TXT) ke PDF.'
-                          : 'Copyright The Document Foundation. Invoked in isolated headless CLI mode for Office document (DOCX, PPTX, XLSX, ODT, TXT) to PDF conversions.'}
+                    <div className="p-4 rounded-xl border border-[#E2E8F0] bg-slate-50">
+                      <div className="font-bold text-sm text-[#0F172A]">LibreOffice Headless (soffice)</div>
+                      <p className="text-xs text-[#64748B] mt-1">
+                        Lisensi: Mozilla Public License v2.0 (MPL-2.0). Digunakan untuk konversi dokumen Office (DOCX, PPTX, XLSX) ke PDF.
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#0F172A] text-xs sm:text-sm">Google WebP Tools (`cwebp`, `dwebp`)</span>
-                        <span className="text-[11px] px-2 py-0.5 rounded bg-sky-100 text-sky-900 font-bold">BSD 3-Clause</span>
-                      </div>
-                      <p className="text-xs text-[#64748B]">
-                        {isId
-                          ? 'Hak Cipta Google LLC. Digunakan untuk encoding dan decoding gambar WebP modern dengan efisiensi kompresi tinggi.'
-                          : 'Copyright Google LLC. Used for state-of-the-art WebP image encoding and decoding.'}
+                    <div className="p-4 rounded-xl border border-[#E2E8F0] bg-slate-50">
+                      <div className="font-bold text-sm text-[#0F172A]">WebP Tools (cwebp, dwebp)</div>
+                      <p className="text-xs text-[#64748B] mt-1">
+                        Lisensi: BSD-3-Clause (Google LLC). Digunakan untuk encoding dan decoding gambar WebP modern.
                       </p>
                     </div>
                   </div>
-                </div>
-              </div>
-            </article>
-          )}
+                </section>
 
-          {/* ==================================================== */}
-          {/* 4. CONTACT */}
-          {/* ==================================================== */}
-          {activeSlug === 'contact' && (
-            <article className="space-y-6">
-              <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200/60">
-                  {isId ? 'Kontak & Bantuan' : 'Contact Us'}
-                </span>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0F172A]">
-                  {isId ? 'Hubungi Pengembang' : 'Contact Developer'}
-                </h1>
-                <p className="text-xs sm:text-sm text-[#64748B]">
-                  {isId ? 'Saluran komunikasi untuk pelaporan bug, usulan fitur, atau pertanyaan lisensi' : 'Communication channels for bug reports, feature requests, or inquiries'}
-                </p>
-              </div>
+                <section id="arsitektur-transparan" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '3. Kode Sumber Terbuka' : '3. Open Source Codebase'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Seluruh kode sumber backend dan antarmuka web ConvertinAja didistribusikan secara transparan melalui repositori GitHub di github.com/faridahmad013/convertinaja.'
+                      : 'The full backend and frontend codebase is publicly published at github.com/faridahmad013/convertinaja.'}
+                  </p>
+                </section>
+              </>
+            )}
 
-              <div className="space-y-4 pt-1 text-[#334155] text-xs sm:text-sm leading-relaxed">
-                <p>
-                  {isId
-                    ? 'ConvertinAja dikelola secara aktif sebagai proyek open-source. Jika Anda mendapati kendala teknis atau ingin berkontribusi, silakan gunakan saluran berikut:'
-                    : 'ConvertinAja is actively maintained as an open-source project. For technical inquiries, bug disclosures, or feature suggestions, reach out through:'}
-                </p>
+            {/* === CONTACT === */}
+            {activeSlug === 'contact' && (
+              <>
+                <header className="space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB]">
+                    {isId ? 'Hubungi Pengembang' : 'Contact Developer'}
+                  </span>
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
+                    {isId
+                      ? 'Kami siap membantu menjawab pertanyaan Anda.'
+                      : 'Get in touch for questions or feedback.'}
+                  </h1>
+                  <p className="text-base text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Apakah Anda memiliki pertanyaan seputar cara kerja konversi, pelaporan masalah teknis, atau permintaan kerja sama?'
+                      : 'Have questions regarding conversions, technical bug reports, or inquiries? Reach out directly.'}
+                  </p>
+                </header>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 rounded-xl bg-slate-50 border border-[#E2E8F0] space-y-1">
-                    <span className="text-xs text-[#64748B] font-medium block">{isId ? 'Email Pengembang' : 'Developer Email'}</span>
-                    <a
-                      href="mailto:contact@faridahmad.dev"
-                      className="font-bold text-[#2563EB] hover:underline text-sm break-all"
-                    >
-                      contact@faridahmad.dev
-                    </a>
-                  </div>
+                <hr className="border-[#E2E8F0]" />
 
-                  <div className="p-4 rounded-xl bg-slate-50 border border-[#E2E8F0] space-y-1">
-                    <span className="text-xs text-[#64748B] font-medium block">{isId ? 'Repositori GitHub' : 'GitHub Repository'}</span>
-                    <a
-                      href="https://github.com/faridahmad013/convertinaja"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-bold text-[#0F172A] hover:text-[#2563EB] transition-colors text-sm inline-flex items-center gap-1.5"
-                    >
-                      <span>faridahmad013/convertinaja</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-[#64748B]" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </article>
-          )}
+                <section id="saluran-kontak" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '1. Saluran Komunikasi Langsung' : '1. Direct Channels'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Email Resmi: faridahmad013@gmail.com'
+                      : 'Direct Email: faridahmad013@gmail.com'}
+                  </p>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Portofolio Pengembang: faridahmad.dev'
+                      : 'Developer Portfolio: faridahmad.dev'}
+                  </p>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'LinkedIn: linkedin.com/in/faridahmad013'
+                      : 'LinkedIn: linkedin.com/in/faridahmad013'}
+                  </p>
+                </section>
+
+                <section id="laporan-bug" className="space-y-3 scroll-mt-36">
+                  <h2 className="text-xl font-bold text-[#0F172A]">
+                    {isId ? '2. Pelaporan Bug & Permintaan Fitur' : '2. Bug Reports & Feature Requests'}
+                  </h2>
+                  <p className="text-sm text-[#475569] leading-relaxed">
+                    {isId
+                      ? 'Untuk kendala teknis atau usulan penambahan format dokumen baru, silakan buka Issue di repositori resmi GitHub: github.com/faridahmad013/convertinaja/issues.'
+                      : 'To report conversion errors or suggest new document formats, submit an issue on GitHub: github.com/faridahmad013/convertinaja/issues.'}
+                  </p>
+                </section>
+              </>
+            )}
+          </article>
         </div>
       </div>
     </div>

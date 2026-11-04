@@ -1,14 +1,11 @@
 import { useState } from 'react'
 import { FileCode2, Menu, X, Globe } from 'lucide-react'
 import { useI18n } from '../i18n'
-import type { LegalPageSlug } from './LegalView'
-
 interface NavbarProps {
   onSelectCategory?: (category: string) => void
-  onOpenLegal?: (slug: LegalPageSlug) => void
 }
 
-export function Navbar({ onOpenLegal }: NavbarProps) {
+export function Navbar({ onSelectCategory: _onSelectCategory }: NavbarProps = {}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { lang, setLang, t } = useI18n()
 
@@ -22,13 +19,6 @@ export function Navbar({ onOpenLegal }: NavbarProps) {
 
   const toggleLanguage = () => {
     setLang(lang === 'id' ? 'en' : 'id')
-  }
-
-  const handleLegalClick = (slug: LegalPageSlug) => {
-    setMobileMenuOpen(false)
-    if (onOpenLegal) {
-      onOpenLegal(slug)
-    }
   }
 
   return (
@@ -59,20 +49,6 @@ export function Navbar({ onOpenLegal }: NavbarProps) {
             className="text-sm font-medium text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
           >
             {t.nav.howItWorks}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLegalClick('privacy')}
-            className="text-sm font-medium text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
-          >
-            {t.nav.privacy}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLegalClick('terms')}
-            className="text-sm font-medium text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
-          >
-            {t.nav.terms}
           </button>
 
           {/* Language Toggle */}
@@ -125,20 +101,6 @@ export function Navbar({ onOpenLegal }: NavbarProps) {
             className="block w-full text-left py-2 text-sm font-medium text-[#0F172A] hover:text-[#2563EB]"
           >
             {t.nav.howItWorks}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLegalClick('privacy')}
-            className="block w-full text-left py-2 text-sm font-medium text-[#0F172A] hover:text-[#2563EB]"
-          >
-            {t.nav.privacy}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLegalClick('terms')}
-            className="block w-full text-left py-2 text-sm font-medium text-[#0F172A] hover:text-[#2563EB]"
-          >
-            {t.nav.terms}
           </button>
         </div>
       )}
