@@ -1,4 +1,4 @@
-import { FileCode2, ExternalLink, Heart } from 'lucide-react'
+import { FileCode2, Heart } from 'lucide-react'
 import { useI18n } from '../i18n'
 import type { LegalPageSlug } from './LegalView'
 
@@ -112,7 +112,7 @@ export function Footer({ onOpenLegal }: FooterProps) {
             </ul>
           </div>
 
-          {/* Col 4: Creator, Portfolio & Connect (3 cols) - Clean Text Links */}
+          {/* Col 4: Creator, Portfolio & Connect (3 cols) - Clean Text Links identical to Policy column */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F172A]">
               {isId ? 'Pengembang' : 'Developer & Author'}
@@ -123,16 +123,15 @@ export function Footer({ onOpenLegal }: FooterProps) {
                 : 'Independently engineered as a FOSS utility for everyday digital productivity.'}
             </p>
 
-            <ul className="space-y-2.5 pt-1 text-xs text-[#64748B]">
+            <ul className="space-y-2 text-xs text-[#64748B]">
               <li>
                 <a
                   href="https://faridahmad.dev"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 font-medium text-[#0F172A] hover:text-[#2563EB] transition-colors"
+                  className="hover:text-[#2563EB] transition-colors"
                 >
-                  <span>Farid Ahmad (Portofolio)</span>
-                  <ExternalLink className="w-3 h-3 text-[#94A3B8]" />
+                  Farid Ahmad (Portofolio)
                 </a>
               </li>
               <li>
@@ -140,10 +139,9 @@ export function Footer({ onOpenLegal }: FooterProps) {
                   href="https://www.linkedin.com/in/faridahmad013"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 font-medium text-[#0F172A] hover:text-[#0A66C2] transition-colors"
+                  className="hover:text-[#2563EB] transition-colors"
                 >
-                  <span>LinkedIn Profil</span>
-                  <ExternalLink className="w-3 h-3 text-[#94A3B8]" />
+                  LinkedIn
                 </a>
               </li>
               <li>
@@ -151,10 +149,9 @@ export function Footer({ onOpenLegal }: FooterProps) {
                   href="https://github.com/faridahmad013"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 font-medium text-[#0F172A] hover:text-[#2563EB] transition-colors"
+                  className="hover:text-[#2563EB] transition-colors"
                 >
-                  <span>GitHub Profil</span>
-                  <ExternalLink className="w-3 h-3 text-[#94A3B8]" />
+                  GitHub
                 </a>
               </li>
             </ul>
