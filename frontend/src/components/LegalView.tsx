@@ -386,28 +386,36 @@ export function LegalView({ initialSlug, onBack }: LegalViewProps) {
                     <div className="p-4 rounded-xl border border-[#E2E8F0] bg-slate-50">
                       <div className="font-bold text-sm text-[#0F172A]">Poppler Utilities (pdftoppm, pdfinfo)</div>
                       <p className="text-xs text-[#64748B] mt-1">
-                        Lisensi: GNU General Public License v2 / v3 (GPLv2/GPLv3). Digunakan untuk rendering PDF ke gambar beresolusi tinggi 300 DPI.
+                        {isId
+                          ? 'Lisensi: GNU General Public License v2 / v3 (GPLv2/GPLv3). Digunakan untuk rendering PDF ke gambar beresolusi tinggi 300 DPI.'
+                          : 'License: GNU General Public License v2 / v3 (GPLv2/GPLv3). Leveraged for 300 DPI high-definition PDF-to-image rendering.'}
                       </p>
                     </div>
 
                     <div className="p-4 rounded-xl border border-[#E2E8F0] bg-slate-50">
                       <div className="font-bold text-sm text-[#0F172A]">Ghostscript (gs)</div>
                       <p className="text-xs text-[#64748B] mt-1">
-                        Lisensi: GNU Affero General Public License (AGPLv3). Digunakan untuk kompresi dan optimasi berkas PDF.
+                        {isId
+                          ? 'Lisensi: GNU Affero General Public License (AGPLv3). Digunakan untuk kompresi dan optimasi berkas PDF.'
+                          : 'License: GNU Affero General Public License (AGPLv3). Used for robust PDF file compression.'}
                       </p>
                     </div>
 
                     <div className="p-4 rounded-xl border border-[#E2E8F0] bg-slate-50">
                       <div className="font-bold text-sm text-[#0F172A]">LibreOffice Headless (soffice)</div>
                       <p className="text-xs text-[#64748B] mt-1">
-                        Lisensi: Mozilla Public License v2.0 (MPL-2.0). Digunakan untuk konversi dokumen Office (DOCX, PPTX, XLSX) ke PDF.
+                        {isId
+                          ? 'Lisensi: Mozilla Public License v2.0 (MPL-2.0). Digunakan untuk konversi dokumen Office (DOCX, PPTX, XLSX) ke PDF.'
+                          : 'License: Mozilla Public License v2.0 (MPL-2.0). Utilized for converting Office documents (DOCX, PPTX, XLSX) to PDF.'}
                       </p>
                     </div>
 
                     <div className="p-4 rounded-xl border border-[#E2E8F0] bg-slate-50">
                       <div className="font-bold text-sm text-[#0F172A]">WebP Tools (cwebp, dwebp)</div>
                       <p className="text-xs text-[#64748B] mt-1">
-                        Lisensi: BSD-3-Clause (Google LLC). Digunakan untuk encoding dan decoding gambar WebP modern.
+                        {isId
+                          ? 'Lisensi: BSD-3-Clause (Google LLC). Digunakan untuk encoding dan decoding gambar WebP modern.'
+                          : 'License: BSD-3-Clause (Google LLC). Used for modern WebP encoding and decoding.'}
                       </p>
                     </div>
                   </div>

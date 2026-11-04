@@ -158,7 +158,7 @@ export function Footer({ onOpenLegal }: FooterProps) {
           <div className="flex items-center gap-1.5 text-center sm:text-left">
             <span>{isId ? 'Dibuat dengan' : 'Built with'}</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
-            <span>oleh <strong className="font-semibold text-[#0F172A]">Farid Ahmad</strong></span>
+            <span>{isId ? 'oleh' : 'by'} <strong className="font-semibold text-[#0F172A]">Farid Ahmad</strong></span>
           </div>
 
           <div className="flex items-center gap-4">
