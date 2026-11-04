@@ -6,6 +6,8 @@
 - **Official Website:** [https://convertinaja.faridahmad.dev](https://convertinaja.faridahmad.dev)  
 - **Developer:** [Farid Ahmad](https://faridahmad.dev)
 
+![ConvertinAja Screenshot](docs/screenshots/homepage.png)
+
 ---
 
 ## Core Values
