@@ -65,7 +65,7 @@ export function PrivacyBanner({ onOpenPrivacy }: PrivacyBannerProps) {
             <button
               type="button"
               onClick={handleDismiss}
-              className="px-3 py-1 rounded-lg bg-[#0F172A] hover:bg-slate-800 text-white font-medium text-xs transition-colors cursor-pointer"
+              className="px-3.5 py-1 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium text-xs transition-colors cursor-pointer shadow-2xs"
             >
               {isId ? 'Mengerti' : 'Got it'}
             </button>
