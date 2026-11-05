@@ -73,4 +73,13 @@ ConvertinAja operates as an independent web orchestration layer and respects all
 
 ## License
 
-ConvertinAja is licensed under the [MIT License](LICENSE).
+ConvertinAja is free, open-source software licensed under the [MIT License](LICENSE).
+
+Upstream binary tools used by this platform retain their respective licenses:
+- **libvips** is licensed under LGPL-2.1+.
+- **Poppler Utilities** are licensed under GPLv2 / GPLv3.
+- **Ghostscript** is licensed under AGPLv3 (Artifex Software, Inc.).
+- **LibreOffice** is licensed under MPL-2.0 / LGPLv3+.
+- **WebP Tools** are licensed under BSD-3-Clause (Google LLC).
+
+All external binaries are executed strictly as independent subprocesses via CLI (`exec.CommandContext`) without linking or bundling proprietary modifications, fully compliant with upstream licensing.
