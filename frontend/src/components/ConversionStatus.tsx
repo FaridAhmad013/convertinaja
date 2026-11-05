@@ -18,13 +18,15 @@ import {
   ArrowLeftRight,
   Sparkles,
 } from 'lucide-react'
-import type { ConversionJobResult, ConvertedFileItem } from '../types/conversion'
+import type { ConversionJobResult, ConvertedFileItem, UploadedFile } from '../types/conversion'
 import { buildDownloadSelectedUrl } from '../services/api'
+import { ImageComparisonSlider } from './ImageComparisonSlider'
 import { useI18n } from '../i18n'
 
 interface ConversionStatusProps {
   job: ConversionJobResult
   hasOriginalFiles?: boolean
+  originalFiles?: UploadedFile[]
   onReset: () => void
   onConvertSameFile?: () => void
   onConvertResultFile?: () => void
@@ -45,9 +47,19 @@ function formatBytes(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
 }
 
+function splitBytes(bytes: number): { value: string; unit: string } {
+  if (!bytes || bytes <= 0) return { value: '0', unit: 'B' }
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  const val = parseFloat((bytes / Math.pow(k, i)).toFixed(1)).toString()
+  return { value: val, unit: sizes[i] }
+}
+
 export function ConversionStatus({
   job,
   hasOriginalFiles,
+  originalFiles,
   onReset,
   onConvertSameFile,
   onConvertResultFile,
@@ -62,6 +74,34 @@ export function ConversionStatus({
 
   const files = useMemo(() => job.files || [], [job.files])
   const isMultiFile = files.length > 1
+
+  // Create temporary preview URL for the original uploaded image file
+  const originalFileUrl = useMemo(() => {
+    if (!originalFiles || originalFiles.length === 0) return null
+    const first = originalFiles[0] as unknown as { file?: File } | File
+    const rawFile =
+      first && typeof first === 'object' && 'file' in first && first.file instanceof File
+        ? first.file
+        : first instanceof File
+          ? first
+          : null
+    if (rawFile) {
+      try {
+        return URL.createObjectURL(rawFile)
+      } catch {
+        return null
+      }
+    }
+    return null
+  }, [originalFiles])
+
+  useEffect(() => {
+    return () => {
+      if (originalFileUrl) {
+        URL.revokeObjectURL(originalFileUrl)
+      }
+    }
+  }, [originalFileUrl])
 
   // Selection list tracking order of selection
   const [selectedIndices, setSelectedIndices] = useState<number[]>(() =>
@@ -247,6 +287,134 @@ export function ConversionStatus({
               {t.status.completedSub}
             </p>
           )}
+
+          {/* Image Optimization Comparison Summary Card (Custom Recommended Design) */}
+          {isCompleted && job.imageStats && (
+            <div className="mt-4 bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden text-left max-w-4xl mx-auto w-full">
+              {/* Header Bar */}
+              <div className="px-5 py-4 bg-slate-50/70 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <span className="font-bold text-xs sm:text-sm uppercase tracking-wider text-slate-700">
+                    {t.status.imageResultTitle}
+                  </span>
+                  <span className="hidden sm:inline-block text-xs font-medium text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded-full">
+                    Balanced Quality
+                  </span>
+                </div>
+
+                <div
+                  className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                    job.imageStats.targetReached
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+                      : 'bg-blue-50 text-[#1D4ED8] border-blue-200/80'
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      job.imageStats.targetReached ? 'bg-emerald-500 animate-pulse' : 'bg-blue-500'
+                    }`}
+                  />
+                  <span>{job.imageStats.targetReached ? t.status.targetReached : t.status.hdOptimal}</span>
+                </div>
+              </div>
+
+              <div className="p-5 sm:p-6 space-y-6">
+                {/* 3 Metric Columns */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  {/* Kolom Sebelum */}
+                  {(() => {
+                    const orig = splitBytes(job.imageStats.originalSize || 0)
+                    return (
+                      <div className="p-4 rounded-xl border border-slate-200/90 bg-white hover:border-slate-300 transition-all">
+                        <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                          {t.status.beforeLabel}
+                        </span>
+                        <div className="mt-1 flex items-baseline gap-1.5">
+                          <span className="text-2xl font-black text-slate-900">{orig.value}</span>
+                          <span className="text-sm font-semibold text-slate-600">{orig.unit}</span>
+                        </div>
+                        {job.imageStats.originalWidth && job.imageStats.originalHeight ? (
+                          <div className="mt-1 text-xs text-slate-600 font-mono">
+                            {job.imageStats.originalWidth} × {job.imageStats.originalHeight} px
+                          </div>
+                        ) : null}
+                      </div>
+                    )
+                  })()}
+
+                  {/* Kolom Sesudah */}
+                  {(() => {
+                    const opt = splitBytes(job.imageStats.optimizedSize || 0)
+                    return (
+                      <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/30 relative">
+                        <div className="flex justify-between items-start">
+                          <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider block">
+                            {t.status.afterLabel}
+                          </span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+                            {job.imageStats.format?.toUpperCase() || 'WEBP'}
+                          </span>
+                        </div>
+                        <div className="mt-1 flex items-baseline gap-1.5">
+                          <span className="text-2xl font-black text-blue-700">{opt.value}</span>
+                          <span className="text-sm font-semibold text-blue-600">{opt.unit}</span>
+                        </div>
+                        {job.imageStats.optimizedWidth && job.imageStats.optimizedHeight ? (
+                          <div className="mt-1 text-xs text-slate-600 font-mono">
+                            {job.imageStats.optimizedWidth} × {job.imageStats.optimizedHeight} px
+                          </div>
+                        ) : null}
+                      </div>
+                    )
+                  })()}
+
+                  {/* Kolom Hemat */}
+                  {(() => {
+                    const saved = splitBytes(job.imageStats.savedBytes || 0)
+                    return (
+                      <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50">
+                        <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">
+                          {t.status.savedLabel}
+                        </span>
+                        <div className="mt-1 flex items-baseline gap-1.5">
+                          <span className="text-2xl font-black text-emerald-600">{saved.value}</span>
+                          <span className="text-sm font-semibold text-emerald-600">{saved.unit}</span>
+                        </div>
+                        <div className="mt-1 text-xs font-semibold text-emerald-700 flex items-center gap-1">
+                          <span>{t.status.reducedPercent(job.imageStats.reductionPercent ?? 0)}</span>
+                          <span className="text-[11px] text-emerald-600/80 font-normal hidden sm:inline">
+                            • {t.status.fasterLoad}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+
+                {/* Interactive Draggable Split View Slider & Privacy EXIF Component */}
+                <ImageComparisonSlider
+                  originalUrl={originalFileUrl || files[0]?.previewUrl || job.downloadUrl || undefined}
+                  optimizedUrl={files[0]?.previewUrl || job.downloadUrl || originalFileUrl || undefined}
+                  originalSize={job.imageStats.originalSize ? formatBytes(job.imageStats.originalSize) : undefined}
+                  optimizedSize={job.imageStats.optimizedSize ? formatBytes(job.imageStats.optimizedSize) : undefined}
+                  originalDims={
+                    job.imageStats.originalWidth && job.imageStats.originalHeight
+                      ? `${job.imageStats.originalWidth} × ${job.imageStats.originalHeight} px`
+                      : undefined
+                  }
+                  optimizedDims={
+                    job.imageStats.optimizedWidth && job.imageStats.optimizedHeight
+                      ? `${job.imageStats.optimizedWidth} × ${job.imageStats.optimizedHeight} px`
+                      : undefined
+                  }
+                  format={job.imageStats.format || 'webp'}
+                />
+              </div>
+            </div>
+          )}
           {isProcessing && (
             <p className="text-xs sm:text-sm text-[#64748B]">
               {t.status.processingSub}
@@ -281,17 +449,13 @@ export function ConversionStatus({
                 )}
                 <span>
                   {selectedIndices.length === files.length
-                    ? isId
-                      ? 'Batal Pilih Semua'
-                      : 'Deselect All'
-                    : isId
-                      ? 'Pilih Semua'
-                      : 'Select All'}
+                    ? t.status.deselectAll
+                    : t.status.selectAll}
                 </span>
               </button>
 
               <span className="text-xs font-medium text-[#64748B] bg-slate-50 px-2.5 py-1 rounded-md border border-[#E2E8F0]">
-                {selectedIndices.length} / {files.length} {isId ? 'dipilih' : 'selected'}
+                {t.status.selectedCount(selectedIndices.length, files.length)}
               </span>
             </div>
 
@@ -310,9 +474,7 @@ export function ConversionStatus({
                     <Download className="w-4 h-4 text-[#2563EB]" />
                   )}
                   <span>
-                    {isId
-                      ? `Unduh Terpilih (${selectedIndices.length}${selectedIndices.length > 1 ? ' .ZIP' : ''})`
-                      : `Download Selected (${selectedIndices.length}${selectedIndices.length > 1 ? ' .ZIP' : ''})`}
+                    {t.status.downloadSelected(selectedIndices.length, selectedIndices.length > 1)}
                   </span>
                 </button>
               )}
@@ -325,7 +487,7 @@ export function ConversionStatus({
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold transition-all shadow-xs hover:shadow-md cursor-pointer"
                 >
                   <FileArchive className="w-4 h-4" />
-                  <span>{isId ? 'Unduh Semua (.ZIP)' : 'Download All (.ZIP)'}</span>
+                  <span>{t.status.downloadZipButton}</span>
                 </a>
               )}
 
@@ -337,7 +499,7 @@ export function ConversionStatus({
                   className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] text-xs font-bold transition-all cursor-pointer shadow-2xs"
                 >
                   <ArrowLeftRight className="w-4 h-4" />
-                  <span>{isId ? 'Konversi Berkas Ini ke Format Lain' : 'Convert File to Other Format'}</span>
+                  <span>{t.status.convertOtherFormat}</span>
                 </button>
               )}
 
@@ -438,7 +600,7 @@ export function ConversionStatus({
                     <div className="p-3 bg-white space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold text-[#0F172A] truncate" title={file.name}>
-                          {isId ? `Halaman ${file.index + 1}` : `Page ${file.index + 1}`}
+                          {t.status.pageLabel(file.index + 1)}
                         </span>
                         {file.size > 0 && (
                           <span className="text-[11px] text-[#64748B] font-medium">
@@ -454,16 +616,16 @@ export function ConversionStatus({
                           className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg border border-[#E2E8F0] bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-[#475569] transition-colors cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5 text-[#2563EB]" />
-                          <span>{isId ? 'Pratinjau' : 'Preview'}</span>
+                          <span>{t.status.previewButton}</span>
                         </button>
                         <a
                           href={file.downloadUrl}
                           download={file.name}
                           className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[11px] font-bold transition-colors cursor-pointer shadow-2xs"
-                          title={isId ? 'Unduh berkas ini' : 'Download this file'}
+                          title={t.status.downloadSingle}
                         >
                           <Download className="w-3.5 h-3.5" />
-                          <span>{isId ? 'Unduh' : 'Download'}</span>
+                          <span>{t.status.downloadSingle}</span>
                         </a>
                       </div>
                     </div>
@@ -505,7 +667,7 @@ export function ConversionStatus({
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-blue-100 text-[#2563EB] font-semibold text-xs sm:text-sm transition-all cursor-pointer shadow-2xs shrink-0"
               >
                 <ArrowLeftRight className="w-4 h-4 text-[#2563EB]" />
-                <span>{isId ? 'Ubah Format Lain' : 'Convert File to Other Format'}</span>
+                <span>{t.status.convertOtherFormat}</span>
               </button>
             )}
 
@@ -517,7 +679,7 @@ export function ConversionStatus({
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-xs sm:text-sm transition-all cursor-pointer shadow-2xs shrink-0"
               >
                 <Sparkles className="w-4 h-4 text-emerald-600" />
-                <span>{isId ? 'Lanjut Konversi Hasil' : 'Chain-Convert Result'}</span>
+                <span>{t.status.convertResultFile}</span>
               </button>
             )}
 

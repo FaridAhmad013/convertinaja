@@ -34,6 +34,17 @@ export function InlineToolSelector({
   const [compressionLevel, setCompressionLevel] = useState<'low' | 'recommended' | 'high'>('recommended')
   const [pageRange, setPageRange] = useState<string>('all')
 
+  // Image Optimization options state
+  const [targetSizePreset, setTargetSizePreset] = useState<'none' | '100kb' | '300kb' | '500kb' | '1mb' | 'custom'>('none')
+  const [customTargetSize, setCustomTargetSize] = useState<number>(300)
+  const [customTargetUnit, setCustomTargetUnit] = useState<'KB' | 'MB'>('KB')
+  const [resizePreset, setResizePreset] = useState<'original' | '1920' | '1600' | '1280' | '1080' | 'custom'>('original')
+  const [customWidth, setCustomWidth] = useState<number>(1920)
+  const [imageFormat, setImageFormat] = useState<'auto' | 'webp' | 'jpeg' | 'png' | 'avif'>('auto')
+  const [qualityStrategy, setQualityStrategy] = useState<'balanced' | 'visual_hq' | 'aggressive'>('balanced')
+  const [stripMetadata, setStripMetadata] = useState<boolean>(true)
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
+
   const selectedTool = compatibleTools.find((t) => t.id === selectedToolId)
   const validFiles = files.filter((f) => f.isValid)
 
@@ -67,6 +78,45 @@ export function InlineToolSelector({
       options.compressionLevel = compressionLevel
     } else if (selectedTool.optionsType === 'page_range') {
       options.pages = pageRange
+    } else if (selectedTool.optionsType === 'image_optimizer') {
+      options.mode = selectedTool.id === 'smart-optimize' ? 'smart' : 'manual'
+      options.output_format = imageFormat
+      options.quality_strategy = qualityStrategy
+      options.remove_metadata = stripMetadata
+      options.maintain_aspect_ratio = true
+
+      if (targetSizePreset === '100kb') {
+        options.target_size_value = 100
+        options.target_size_unit = 'KB'
+      } else if (targetSizePreset === '300kb') {
+        options.target_size_value = 300
+        options.target_size_unit = 'KB'
+      } else if (targetSizePreset === '500kb') {
+        options.target_size_value = 500
+        options.target_size_unit = 'KB'
+      } else if (targetSizePreset === '1mb') {
+        options.target_size_value = 1
+        options.target_size_unit = 'MB'
+      } else if (targetSizePreset === 'custom' && customTargetSize > 0) {
+        options.target_size_value = customTargetSize
+        options.target_size_unit = customTargetUnit
+      }
+
+      if (resizePreset === '1920') {
+        options.max_width = 1920
+        options.max_height = 1920
+      } else if (resizePreset === '1600') {
+        options.max_width = 1600
+        options.max_height = 1600
+      } else if (resizePreset === '1280') {
+        options.max_width = 1280
+        options.max_height = 1280
+      } else if (resizePreset === '1080') {
+        options.max_width = 1080
+        options.max_height = 1080
+      } else if (resizePreset === 'custom' && customWidth > 0) {
+        options.max_width = customWidth
+      }
     }
 
     onStartConversion(selectedTool, options)
@@ -228,6 +278,169 @@ export function InlineToolSelector({
                     </button>
                   )
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* Image Optimizer Configuration */}
+          {selectedTool.optionsType === 'image_optimizer' && (
+            <div className="space-y-4">
+              {/* Target File Size Selection */}
+              <div>
+                <label className="text-xs font-semibold text-[#0F172A] block mb-1.5">
+                  {t.selector.targetSizeTitle}
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                  {[
+                    { id: 'none', label: t.selector.targetSizeAuto },
+                    { id: '100kb', label: '≤ 100 KB' },
+                    { id: '300kb', label: '≤ 300 KB' },
+                    { id: '500kb', label: '≤ 500 KB' },
+                    { id: '1mb', label: '≤ 1 MB' },
+                    { id: 'custom', label: t.selector.targetSizeCustom },
+                  ].map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setTargetSizePreset(p.id as typeof targetSizePreset)}
+                      className={`px-2.5 py-2 text-xs font-medium rounded-lg border text-center transition-all cursor-pointer ${
+                        targetSizePreset === p.id
+                          ? 'border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8] ring-1 ring-[#2563EB]'
+                          : 'border-[#E2E8F0] bg-white text-[#64748B] hover:border-slate-300'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+
+                {targetSizePreset === 'custom' && (
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={10}
+                      max={50000}
+                      value={customTargetSize}
+                      onChange={(e) => setCustomTargetSize(Number(e.target.value))}
+                      className="w-32 bg-white border border-[#E2E8F0] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                      placeholder={t.selector.targetSizePlaceholder}
+                    />
+                    <select
+                      value={customTargetUnit}
+                      onChange={(e) => setCustomTargetUnit(e.target.value as 'KB' | 'MB')}
+                      className="bg-white border border-[#E2E8F0] rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none"
+                    >
+                      <option value="KB">KB</option>
+                      <option value="MB">MB</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {/* Advanced Settings Toggle */}
+              <div className="border-t border-[#E2E8F0] pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="text-xs text-[#2563EB] font-medium hover:underline inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <Settings2 className="w-3.5 h-3.5" />
+                  <span>{showAdvanced ? t.selector.advancedSettingsHide : t.selector.advancedSettingsShow}</span>
+                </button>
+
+                {showAdvanced && (
+                  <div className="mt-3 space-y-3 pt-2">
+                    {/* Resize Preset */}
+                    <div>
+                      <label className="text-[11px] font-medium text-[#64748B] block mb-1">
+                        {t.selector.resizeResolutionLabel}
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                        {[
+                          { id: 'original', label: t.selector.resizeOriginal },
+                          { id: '1920', label: '1920 px (Large)' },
+                          { id: '1600', label: '1600 px (Med)' },
+                          { id: '1280', label: '1280 px (Std)' },
+                          { id: '1080', label: '1080 px (Small)' },
+                          { id: 'custom', label: t.selector.resizeCustom },
+                        ].map((r) => (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => setResizePreset(r.id as typeof resizePreset)}
+                            className={`px-2 py-1.5 text-[11px] rounded border text-center transition-all cursor-pointer ${
+                              resizePreset === r.id
+                                ? 'border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8]'
+                                : 'border-[#E2E8F0] bg-white text-[#64748B]'
+                            }`}
+                          >
+                            {r.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {resizePreset === 'custom' && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <input
+                            type="number"
+                            min={100}
+                            max={10000}
+                            value={customWidth}
+                            onChange={(e) => setCustomWidth(Number(e.target.value))}
+                            className="w-32 bg-white border border-[#E2E8F0] rounded-lg px-2.5 py-1 text-xs text-[#0F172A]"
+                            placeholder={t.selector.resizePlaceholder}
+                          />
+                          <span className="text-xs text-[#64748B]">{t.selector.longestSideUnit}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Output Format & Strategy */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] font-medium text-[#64748B] block mb-1">{t.selector.outputFormatLabel}</label>
+                        <select
+                          value={imageFormat}
+                          onChange={(e) => setImageFormat(e.target.value as typeof imageFormat)}
+                          className="w-full bg-white border border-[#E2E8F0] rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A]"
+                        >
+                          <option value="auto">{t.selector.optAuto}</option>
+                          <option value="webp">{t.selector.optWebp}</option>
+                          <option value="jpeg">{t.selector.optJpeg}</option>
+                          <option value="png">{t.selector.optPng}</option>
+                          <option value="avif">{t.selector.optAvif}</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-medium text-[#64748B] block mb-1">{t.selector.strategyLabel}</label>
+                        <select
+                          value={qualityStrategy}
+                          onChange={(e) => setQualityStrategy(e.target.value as typeof qualityStrategy)}
+                          className="w-full bg-white border border-[#E2E8F0] rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A]"
+                        >
+                          <option value="balanced">{t.selector.stratBalanced}</option>
+                          <option value="visual_hq">{t.selector.stratVisualHQ}</option>
+                          <option value="aggressive">{t.selector.stratAggressive}</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Metadata stripping */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="checkbox"
+                        id="stripMetaCheckbox"
+                        checked={stripMetadata}
+                        onChange={(e) => setStripMetadata(e.target.checked)}
+                        className="rounded border-[#CBD5E1] text-[#2563EB] focus:ring-[#2563EB]"
+                      />
+                      <label htmlFor="stripMetaCheckbox" className="text-xs text-[#64748B] cursor-pointer">
+                        {t.selector.stripMetadataLabel}
+                      </label>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

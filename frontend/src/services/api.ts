@@ -116,6 +116,99 @@ export async function getJobStatus(jobId: string, token: string): Promise<JobSta
   return response.json()
 }
 
+export async function optimizeImageJob(
+  files: File[],
+  toolId: string,
+  options?: Record<string, unknown>
+): Promise<{
+  job_id: string
+  access_token: string
+  batchRes: {
+    job_id: string
+    status: string
+    total_original_bytes: number
+    total_optimized_bytes: number
+    total_saved_bytes: number
+    total_reduction_percent: number
+    items: Array<{
+      status: string
+      original: {
+        filename?: string
+        format: string
+        size: number
+        width: number
+        height: number
+        has_alpha: boolean
+        orientation: number
+      }
+      optimized: {
+        format: string
+        size: number
+        width: number
+        height: number
+      }
+      reduction_percent: number
+      saved_bytes: number
+      target_reached: boolean
+      download_url: string
+      preview_url?: string
+      error_message?: string
+    }>
+    zip_download_url?: string
+  }
+}> {
+  const formData = new FormData()
+
+  // Format options
+  const config = {
+    mode: options?.mode || (toolId === 'smart-optimize' ? 'smart' : 'manual'),
+    output_format: options?.output_format || 'auto',
+    quality: options?.quality || 80,
+    max_width: options?.max_width || 0,
+    max_height: options?.max_height || 0,
+    maintain_aspect_ratio: options?.maintain_aspect_ratio !== false,
+    remove_metadata: options?.remove_metadata !== false,
+    quality_strategy: options?.quality_strategy || 'balanced',
+    target_size: options?.target_size_value
+      ? {
+          value: options.target_size_value,
+          unit: options.target_size_unit || 'KB',
+        }
+      : undefined,
+  }
+
+  formData.append('config', JSON.stringify(config))
+
+  for (const file of files) {
+    formData.append('files', file)
+  }
+
+  const response = await fetch(`${API_BASE_URL}/image/optimize`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    let errorMsg = 'Gagal mengoptimasi gambar.'
+    try {
+      const errJson = await response.json()
+      if (errJson.error) errorMsg = errJson.error
+    } catch {
+      errorMsg = response.statusText || errorMsg
+    }
+    throw new ApiError(errorMsg, response.status)
+  }
+
+  const token = response.headers.get('X-Job-Token') || ''
+  const batchRes = await response.json()
+
+  return {
+    job_id: batchRes.job_id || generateUUID(),
+    access_token: token,
+    batchRes,
+  }
+}
+
 export function buildDownloadUrl(jobId: string, token: string): string {
   return `${API_BASE_URL}/conversions/${encodeURIComponent(jobId)}/download?token=${encodeURIComponent(token)}`
 }

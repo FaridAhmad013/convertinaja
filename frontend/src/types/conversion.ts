@@ -17,12 +17,13 @@ export interface ToolDefinition {
   name: string
   category: CategoryType
   description: string
+  descriptionEn?: string
   allowedFormats: FileFormat[]
   minFiles: number
   maxFiles: number
   outputFormat: string
   requiresOptions?: boolean
-  optionsType?: 'compression_level' | 'page_range' | 'image_format' | 'quality'
+  optionsType?: 'compression_level' | 'page_range' | 'image_format' | 'quality' | 'image_optimizer'
 }
 
 export type JobStatus = 
@@ -34,12 +35,26 @@ export type JobStatus =
   | 'completed'
   | 'failed'
 
+export interface ImageOptimizationStats {
+  originalWidth?: number
+  originalHeight?: number
+  originalSize?: number
+  optimizedWidth?: number
+  optimizedHeight?: number
+  optimizedSize?: number
+  reductionPercent?: number
+  savedBytes?: number
+  targetReached?: boolean
+  format?: string
+}
+
 export interface ConvertedFileItem {
   index: number
   name: string
   size: number
   downloadUrl: string
   previewUrl: string
+  stats?: ImageOptimizationStats
 }
 
 export interface ConversionJobResult {
@@ -54,4 +69,5 @@ export interface ConversionJobResult {
   fileSize?: number
   expiresAt?: string
   errorMessage?: string
+  imageStats?: ImageOptimizationStats
 }

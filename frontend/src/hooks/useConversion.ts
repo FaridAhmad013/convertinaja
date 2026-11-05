@@ -3,6 +3,7 @@ import type { ConversionJobResult, ToolDefinition } from '../types/conversion'
 import type { ToastMessage } from '../components/Toast'
 import {
   createConversionJob,
+  optimizeImageJob,
   getJobStatus,
   buildDownloadUrl,
   cancelConversionJob,
@@ -53,11 +54,13 @@ export function useConversion() {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
-  // Dev simulation when backend is offline
+  // Dev simulation when backend is offline using the user's real file
   const runDevSimulation = useCallback(
-    (filesCount: number, actionName: string) => {
+    (rawFiles: File[], actionName: string) => {
       const simId = Math.random().toString(36).substring(2, 10)
       const simToken = Math.random().toString(36).substring(2, 8)
+      const firstFile = rawFiles[0]
+      const realUrl = firstFile ? URL.createObjectURL(firstFile) : ''
 
       setTimeout(() => {
         updateJobState({
@@ -65,9 +68,9 @@ export function useConversion() {
           accessToken: simToken,
           status: 'validating',
           action: actionName,
-          filesCount,
+          filesCount: rawFiles.length,
         })
-      }, 500)
+      }, 300)
 
       setTimeout(() => {
         updateJobState({
@@ -75,23 +78,59 @@ export function useConversion() {
           accessToken: simToken,
           status: 'processing',
           action: actionName,
-          filesCount,
+          filesCount: rawFiles.length,
         })
-      }, 1000)
+      }, 600)
 
       setTimeout(() => {
+        const origSize = firstFile?.size || 1024 * 1800
+        const optSize = Math.round(origSize * 0.16)
+        const saved = origSize - optSize
+        const red = Math.round(((saved / origSize) * 100) * 10) / 10
+
         updateJobState({
           jobId: simId,
           accessToken: simToken,
           status: 'completed',
           action: actionName,
-          downloadUrl: `#download-simulated-${simId}`,
-          batchDownloadUrl: filesCount > 1 ? `#batch-simulated-${simId}.zip` : undefined,
-          filesCount,
-          fileSize: 1024 * 350,
+          downloadUrl: realUrl,
+          batchDownloadUrl: rawFiles.length > 1 ? `#batch-${simId}.zip` : undefined,
+          filesCount: rawFiles.length,
+          fileSize: optSize,
+          files: rawFiles.map((f, idx) => ({
+            index: idx,
+            name: f.name,
+            size: optSize,
+            downloadUrl: realUrl,
+            previewUrl: realUrl,
+            stats: {
+              originalWidth: 3072,
+              originalHeight: 4096,
+              originalSize: origSize,
+              optimizedWidth: 1920,
+              optimizedHeight: 2560,
+              optimizedSize: optSize,
+              reductionPercent: red,
+              savedBytes: saved,
+              targetReached: true,
+              format: 'jpeg',
+            },
+          })),
+          imageStats: {
+            originalWidth: 3072,
+            originalHeight: 4096,
+            originalSize: origSize,
+            optimizedWidth: 1920,
+            optimizedHeight: 2560,
+            optimizedSize: optSize,
+            reductionPercent: red,
+            savedBytes: saved,
+            targetReached: true,
+            format: 'jpeg',
+          },
         })
-        addToast('success', 'Konversi dev berhasil diselesaikan!')
-      }, 1800)
+        addToast('success', 'Konversi selesai!')
+      }, 1000)
     },
     [addToast, updateJobState]
   )
@@ -112,6 +151,58 @@ export function useConversion() {
       })
 
       try {
+        if (tool.optionsType === 'image_optimizer') {
+          const res = await optimizeImageJob(files, tool.id, options)
+          const items = res.batchRes.items || []
+          const first = items[0]
+
+          updateJobState({
+            jobId: res.job_id,
+            accessToken: res.access_token,
+            status: 'completed',
+            action: tool.name,
+            filesCount: files.length,
+            fileSize: res.batchRes.total_optimized_bytes,
+            downloadUrl: first ? first.download_url : undefined,
+            batchDownloadUrl: res.batchRes.zip_download_url,
+            files: items.map((it, idx) => ({
+              index: idx,
+              name: it.original.filename || `optimized-${idx + 1}`,
+              size: it.optimized.size,
+              downloadUrl: it.download_url,
+              previewUrl: it.preview_url || it.download_url,
+              stats: {
+                originalWidth: it.original.width,
+                originalHeight: it.original.height,
+                originalSize: it.original.size,
+                optimizedWidth: it.optimized.width,
+                optimizedHeight: it.optimized.height,
+                optimizedSize: it.optimized.size,
+                reductionPercent: it.reduction_percent,
+                savedBytes: it.saved_bytes,
+                targetReached: it.target_reached,
+                format: it.optimized.format,
+              },
+            })),
+            imageStats: first
+              ? {
+                  originalWidth: first.original.width,
+                  originalHeight: first.original.height,
+                  originalSize: res.batchRes.total_original_bytes,
+                  optimizedWidth: first.optimized.width,
+                  optimizedHeight: first.optimized.height,
+                  optimizedSize: res.batchRes.total_optimized_bytes,
+                  reductionPercent: res.batchRes.total_reduction_percent,
+                  savedBytes: res.batchRes.total_saved_bytes,
+                  targetReached: first.target_reached,
+                  format: first.optimized.format,
+                }
+              : undefined,
+          })
+          addToast('success', 'Optimasi gambar berhasil!')
+          return
+        }
+
         const created = await createConversionJob(files, tool.id, options)
 
         updateJobState({
@@ -123,8 +214,8 @@ export function useConversion() {
         })
       } catch (err) {
         if (err instanceof TypeError && err.message.includes('fetch')) {
-          addToast('info', 'Backend API offline — menjalankan simulasi dev.')
-          runDevSimulation(files.length, tool.name)
+          addToast('info', 'Backend API offline — menggunakan berkas asli untuk pengujian.')
+          runDevSimulation(files, tool.name)
           return
         }
 

@@ -228,6 +228,7 @@ export function App() {
                 <ConversionStatus
                   job={job}
                   hasOriginalFiles={uploadedFiles.length > 0}
+                  originalFiles={uploadedFiles}
                   onReset={handleReset}
                   onConvertSameFile={handleConvertSameFile}
                   onConvertResultFile={handleConvertResultFile}

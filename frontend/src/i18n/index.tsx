@@ -1,3 +1,4 @@
+import type React from 'react'
 import { useState, useEffect, createContext, useContext } from 'react'
 
 export type Language = 'id' | 'en'
@@ -27,12 +28,16 @@ export interface Translations {
   }
   popular: {
     title: string
-    pdfConverter: string
-    pdfConverterDesc: string
-    imageConverter: string
-    imageConverterDesc: string
+    smartOptimize: string
+    smartOptimizeDesc: string
+    compressImage: string
+    compressImageDesc: string
     compressPdf: string
     compressPdfDesc: string
+    imageConverter: string
+    imageConverterDesc: string
+    pdfConverter: string
+    pdfConverterDesc: string
     mergePdf: string
     mergePdfDesc: string
   }
@@ -70,6 +75,29 @@ export interface Translations {
     processingButton: string
     unsupportedComb: string
     unsupportedCombDesc: string
+    // Image Optimizer Strings
+    targetSizeTitle: string
+    targetSizeAuto: string
+    targetSizeCustom: string
+    targetSizePlaceholder: string
+    advancedSettingsShow: string
+    advancedSettingsHide: string
+    resizeResolutionLabel: string
+    resizeOriginal: string
+    resizeCustom: string
+    resizePlaceholder: string
+    longestSideUnit: string
+    outputFormatLabel: string
+    optAuto: string
+    optWebp: string
+    optJpeg: string
+    optPng: string
+    optAvif: string
+    strategyLabel: string
+    stratBalanced: string
+    stratVisualHQ: string
+    stratAggressive: string
+    stripMetadataLabel: string
   }
   status: {
     uploading: string
@@ -86,6 +114,52 @@ export interface Translations {
     purgeNow: string
     purgedSuccess: string
     convertAgain: string
+    // Image status strings
+    imageResultTitle: string
+    targetReached: string
+    hdOptimal: string
+    beforeLabel: string
+    afterLabel: string
+    savedLabel: string
+    reducedPercent: (n: number) => string
+    fasterLoad: string
+    convertOtherFormat: string
+    convertResultFile: string
+    downloadSelected: (n: number, isZip: boolean) => string
+    selectedCount: (selected: number, total: number) => string
+    selectAll: string
+    deselectAll: string
+    pageLabel: (page: number) => string
+    previewButton: string
+    downloadSingle: string
+  }
+  imageComparison: {
+    privacyTitle: string
+    cleanBadge: string
+    privacyDesc: string
+    viewDetails: string
+    hideDetails: string
+    noticeSafe: string
+    sliderHint: string
+    sideBySideHint: string
+    splitSlider: string
+    sideBySide: string
+    beforeHeading: string
+    afterHeading: string
+    beforeBadge: (size: string) => string
+    afterBadge: (size: string) => string
+    gpsCategory: string
+    gpsCoord: string
+    altitude: string
+    accuracy: string
+    cameraCategory: string
+    cameraModel: string
+    aperture: string
+    focalLength: string
+    timeCategory: string
+    captureTime: string
+    softwareOS: string
+    serialID: string
   }
   catalog: {
     title: string
@@ -124,11 +198,11 @@ export const translations: Record<Language, Translations> = {
       changeLang: 'Ganti Bahasa',
     },
     hero: {
-      badge: 'KONVERSI BERKAS PRAKTIS',
-      title: 'Ubah berkas Anda. Cepat dan bebas ribet.',
-      subtitle: 'Semua alat konversi dokumen, gambar, dan PDF dalam satu tempat. 100% gratis tanpa perlu daftar akun.',
-      freeBadge: 'Convert for completely free with no paywall',
-      supportCreator: 'click on the ads to help the creator',
+      badge: 'KONVERSI & OPTIMASI BERKAS CEPAT',
+      title: 'Ubah dan kompres berkas Anda. Cepat & bebas ribet.',
+      subtitle: 'Semua alat konversi dokumen, kompresi gambar, dan PDF dalam satu tempat. 100% gratis tanpa perlu registrasi.',
+      freeBadge: 'Gratis tanpa batasan biaya atau langganan',
+      supportCreator: 'Dukung kreator dengan berbagi platform ini',
     },
     upload: {
       dropTitle: 'Tarik & letakkan berkas Anda ke sini',
@@ -139,12 +213,16 @@ export const translations: Record<Language, Translations> = {
     },
     popular: {
       title: 'Peralatan Populer',
-      pdfConverter: 'PDF ke Gambar (JPG/PNG)',
-      pdfConverterDesc: 'Render halaman PDF menjadi gambar resolusi tinggi',
+      smartOptimize: 'Smart Image Optimizer',
+      smartOptimizeDesc: 'Kompres & pertahankan ketajaman visual HD secara otomatis',
+      compressImage: 'Kompres Gambar (Target Size)',
+      compressImageDesc: 'Kecilkan ukuran file foto ke batas tertentu (≤ 100KB, 300KB, dsb.)',
       imageConverter: 'Gambar ke PDF',
-      imageConverterDesc: 'Gabungkan foto JPG/PNG menjadi satu berkas PDF',
+      imageConverterDesc: 'Gabungkan foto JPG/PNG menjadi satu berkas PDF rapi',
       compressPdf: 'Kompres PDF',
       compressPdfDesc: 'Kecilkan ukuran berkas PDF dengan tetap tajam',
+      pdfConverter: 'PDF ke Gambar (JPG/PNG)',
+      pdfConverterDesc: 'Render halaman PDF menjadi gambar resolusi tinggi',
       mergePdf: 'Gabung PDF (Merge)',
       mergePdfDesc: 'Satukan beberapa berkas PDF menjadi satu urutan',
     },
@@ -182,6 +260,28 @@ export const translations: Record<Language, Translations> = {
       processingButton: 'Sedang Mengonversi...',
       unsupportedComb: 'Kombinasi Berkas Belum Didukung',
       unsupportedCombDesc: 'Format atau jumlah berkas belum memiliki operasi yang cocok. Pastikan berkas seragam.',
+      targetSizeTitle: 'Target Ukuran File (Opsional)',
+      targetSizeAuto: 'Bebas / Auto',
+      targetSizeCustom: 'Kustom',
+      targetSizePlaceholder: 'Contoh: 300',
+      advancedSettingsShow: 'Tampilkan Pengaturan Lanjutan (Dimensi, Format, Kualitas)',
+      advancedSettingsHide: 'Sembunyikan Pengaturan Lanjutan',
+      resizeResolutionLabel: 'Batas Resolusi Maksimal (Rasio Aspek Terjaga)',
+      resizeOriginal: 'Asli',
+      resizeCustom: 'Kustom px',
+      resizePlaceholder: 'Maksimal px',
+      longestSideUnit: 'piksel sisi terpanjang',
+      outputFormatLabel: 'Format Output',
+      optAuto: 'Auto (Paling Ringan & Efisien)',
+      optWebp: 'WebP (Modern, Ringan, Transparan)',
+      optJpeg: 'JPEG (Universal Foto)',
+      optPng: 'PNG (Tanpa Kompresi Lossy)',
+      optAvif: 'AVIF (Ultra Kompresi Terbaru)',
+      strategyLabel: 'Strategi Kualitas Visual',
+      stratBalanced: 'Balanced (Seimbang HD & Ukuran)',
+      stratVisualHQ: 'Visual HQ (Prioritaskan Ketajaman)',
+      stratAggressive: 'Aggressive (Kecilkan File Maksimal)',
+      stripMetadataLabel: 'Hapus metadata EXIF & lokasi GPS untuk menghemat ukuran dan melindungi privasi',
     },
     status: {
       uploading: 'Mengunggah berkas ke server...',
@@ -198,6 +298,51 @@ export const translations: Record<Language, Translations> = {
       purgeNow: 'Hapus dari Server Sekarang',
       purgedSuccess: 'Berkas telah berhasil dimusnahkan permanen dari server!',
       convertAgain: 'Konversi Dokumen Lain',
+      imageResultTitle: 'Hasil Optimasi Gambar',
+      targetReached: 'Target Tercapai',
+      hdOptimal: 'Kualitas HD Optimal',
+      beforeLabel: 'Sebelum',
+      afterLabel: 'Sesudah (Optimasi)',
+      savedLabel: 'Total Hemat Ukuran',
+      reducedPercent: (n) => `Berkurang ${n}%`,
+      fasterLoad: 'Lebih cepat di-load',
+      convertOtherFormat: 'Ubah Format Lain',
+      convertResultFile: 'Lanjut Konversi Hasil',
+      downloadSelected: (n, isZip) => `Unduh Terpilih (${n}${isZip ? ' .ZIP' : ''})`,
+      selectedCount: (s, t) => `${s} / ${t} dipilih`,
+      selectAll: 'Pilih Semua',
+      deselectAll: 'Batal Pilih Semua',
+      pageLabel: (p) => `Halaman ${p}`,
+      previewButton: 'Pratinjau',
+      downloadSingle: 'Unduh',
+    },
+    imageComparison: {
+      privacyTitle: 'Privasi Terlindungi: EXIF & GPS Dihapus',
+      cleanBadge: 'Bersih 100%',
+      privacyDesc: 'Informasi lokasi GPS, jenis kamera, dan identitas perangkat telah dimusnahkan.',
+      viewDetails: 'Lihat Detail',
+      hideDetails: 'Tutup Detail',
+      noticeSafe: 'File output aman untuk dibagikan di internet tanpa meninggalkan jejak lokasi sensitif.',
+      sliderHint: 'Geser handle di tengah untuk membandingkan ketajaman visual',
+      sideBySideHint: 'Tampilan berdampingan untuk evaluasi warna & kontras',
+      splitSlider: 'Split Slider',
+      sideBySide: 'Berdampingan',
+      beforeHeading: 'Sebelum (Original)',
+      afterHeading: 'Sesudah (Smart Compressed)',
+      beforeBadge: (size) => `Before: ${size}`,
+      afterBadge: (size) => `After: ${size}`,
+      gpsCategory: 'Lokasi & GPS',
+      gpsCoord: 'Koordinat GPS',
+      altitude: 'Ketinggian (Altitude)',
+      accuracy: 'Akurasi GPS',
+      cameraCategory: 'Identitas Perangkat & Lensa',
+      cameraModel: 'Model Kamera',
+      aperture: 'Bukaan (Aperture)',
+      focalLength: 'Panjang Fokus',
+      timeCategory: 'Waktu & Perangkat Lunak',
+      captureTime: 'Waktu Pengambilan',
+      softwareOS: 'Software / OS',
+      serialID: 'Serial ID File',
     },
     catalog: {
       title: 'Jelajahi Beragam Peralatan Konversi',
@@ -234,11 +379,11 @@ export const translations: Record<Language, Translations> = {
       changeLang: 'Change Language',
     },
     hero: {
-      badge: 'SIMPLE FILE CONVERSION',
-      title: 'Convert your files. Simply and quickly.',
-      subtitle: 'All your document, image, and PDF conversion tools in one place. 100% free with no account required.',
-      freeBadge: 'Convert for completely free with no paywall',
-      supportCreator: 'click on the ads to help the creator',
+      badge: 'SIMPLE CONVERSION & OPTIMIZATION',
+      title: 'Convert and optimize files. Fast & effortless.',
+      subtitle: 'All your document conversion, image optimization, and PDF tools in one place. 100% free with no registration.',
+      freeBadge: 'Completely free with no paywall or subscriptions',
+      supportCreator: 'Support the creator by sharing this tool',
     },
     upload: {
       dropTitle: 'Drop your files here',
@@ -249,12 +394,16 @@ export const translations: Record<Language, Translations> = {
     },
     popular: {
       title: 'Popular tools',
+      smartOptimize: 'Smart Image Optimizer',
+      smartOptimizeDesc: 'Compress photos with perceptual HD clarity and zero artifacts',
+      compressImage: 'Compress Image (Target Size)',
+      compressImageDesc: 'Reduce photo file size to exact quotas (≤ 100KB, 300KB, custom)',
+      imageConverter: 'Image to PDF',
+      imageConverterDesc: 'Bundle JPG/PNG images into a single clean PDF document',
+      compressPdf: 'Compress PDF',
+      compressPdfDesc: 'Reduce PDF file size while maintaining readability',
       pdfConverter: 'PDF to Image (JPG/PNG)',
       pdfConverterDesc: 'Render PDF pages into high-resolution images',
-      imageConverter: 'Image to PDF',
-      imageConverterDesc: 'Bundle JPG/PNG images into a single PDF',
-      compressPdf: 'Compress PDF',
-      compressPdfDesc: 'Reduce PDF file size while maintaining clarity',
       mergePdf: 'Merge PDF',
       mergePdfDesc: 'Combine multiple PDF files into one ordered document',
     },
@@ -292,6 +441,28 @@ export const translations: Record<Language, Translations> = {
       processingButton: 'Converting...',
       unsupportedComb: 'Unsupported File Combination',
       unsupportedCombDesc: 'The uploaded file formats do not match a common operation. Please upload uniform types.',
+      targetSizeTitle: 'Target File Size (Optional)',
+      targetSizeAuto: 'Auto / Free',
+      targetSizeCustom: 'Custom',
+      targetSizePlaceholder: 'e.g. 300',
+      advancedSettingsShow: 'Show Advanced Settings (Dimensions, Format, Quality)',
+      advancedSettingsHide: 'Hide Advanced Settings',
+      resizeResolutionLabel: 'Maximum Resolution Limit (Maintains Aspect Ratio)',
+      resizeOriginal: 'Original',
+      resizeCustom: 'Custom px',
+      resizePlaceholder: 'Max px',
+      longestSideUnit: 'longest edge pixels',
+      outputFormatLabel: 'Output Format',
+      optAuto: 'Auto (Most Lightweight & Efficient)',
+      optWebp: 'WebP (Modern, Compact, Transparent)',
+      optJpeg: 'JPEG (Universal Photo)',
+      optPng: 'PNG (Lossless Quality)',
+      optAvif: 'AVIF (Next-Gen Ultra Compression)',
+      strategyLabel: 'Visual Quality Strategy',
+      stratBalanced: 'Balanced (Balanced HD & Size)',
+      stratVisualHQ: 'Visual HQ (Prioritize Sharpness)',
+      stratAggressive: 'Aggressive (Maximum Size Reduction)',
+      stripMetadataLabel: 'Strip EXIF metadata & GPS location to reduce size and protect privacy',
     },
     status: {
       uploading: 'Uploading files to server...',
@@ -308,6 +479,51 @@ export const translations: Record<Language, Translations> = {
       purgeNow: 'Delete from Server Now',
       purgedSuccess: 'Files permanently destroyed from server!',
       convertAgain: 'Convert Another File',
+      imageResultTitle: 'Image Optimization Results',
+      targetReached: 'Target Reached',
+      hdOptimal: 'Optimal HD Quality',
+      beforeLabel: 'Before',
+      afterLabel: 'After (Optimized)',
+      savedLabel: 'Total Size Saved',
+      reducedPercent: (n) => `Reduced by ${n}%`,
+      fasterLoad: 'Faster load speed',
+      convertOtherFormat: 'Convert to Other Format',
+      convertResultFile: 'Chain-Convert Result',
+      downloadSelected: (n, isZip) => `Download Selected (${n}${isZip ? ' .ZIP' : ''})`,
+      selectedCount: (s, t) => `${s} / ${t} selected`,
+      selectAll: 'Select All',
+      deselectAll: 'Deselect All',
+      pageLabel: (p) => `Page ${p}`,
+      previewButton: 'Preview',
+      downloadSingle: 'Download',
+    },
+    imageComparison: {
+      privacyTitle: 'Privacy Protected: EXIF & GPS Stripped',
+      cleanBadge: '100% Clean',
+      privacyDesc: 'GPS coordinates, camera model, and device identifiers have been completely removed.',
+      viewDetails: 'View Details',
+      hideDetails: 'Hide Details',
+      noticeSafe: 'The output file is completely safe to share online without leaving sensitive location traces.',
+      sliderHint: 'Drag the handle across the image to evaluate visual sharpness',
+      sideBySideHint: 'Side-by-side view for direct contrast and color fidelity comparison',
+      splitSlider: 'Split Slider',
+      sideBySide: 'Side-by-Side',
+      beforeHeading: 'Before (Original)',
+      afterHeading: 'Sesudah (Smart Compressed)',
+      beforeBadge: (size) => `Before: ${size}`,
+      afterBadge: (size) => `After: ${size}`,
+      gpsCategory: 'Location & GPS',
+      gpsCoord: 'GPS Coordinates',
+      altitude: 'Altitude',
+      accuracy: 'GPS Accuracy',
+      cameraCategory: 'Device & Camera Specs',
+      cameraModel: 'Camera Model',
+      aperture: 'Aperture',
+      focalLength: 'Focal Length',
+      timeCategory: 'Timestamp & Software',
+      captureTime: 'Date & Time',
+      softwareOS: 'Software / OS',
+      serialID: 'File Serial ID',
     },
     catalog: {
       title: 'Explore All Conversion Tools',
@@ -344,36 +560,41 @@ function detectDefaultLanguage(): Language {
   return browserLang.startsWith('id') ? 'id' : 'en'
 }
 
-interface I18nContextType {
+export interface I18nContextValue {
   lang: Language
+  setLanguage: (lang: Language) => void
   setLang: (lang: Language) => void
   t: Translations
 }
 
-export const I18nContext = createContext<I18nContextType>({
+export function useI18nState(): I18nContextValue {
+  const [lang, setLang] = useState<Language>(detectDefaultLanguage)
+
+  useEffect(() => {
+    localStorage.setItem('convertinaja_lang', lang)
+    document.documentElement.lang = lang
+  }, [lang])
+
+  return {
+    lang,
+    setLanguage: setLang,
+    setLang,
+    t: translations[lang],
+  }
+}
+
+export const I18nContext = createContext<I18nContextValue>({
   lang: 'en',
+  setLanguage: () => {},
   setLang: () => {},
   t: translations.en,
 })
 
-export function useI18n() {
-  return useContext(I18nContext)
+export function I18nProvider({ children }: { children: React.ReactNode }) {
+  const value = useI18nState()
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }
 
-export function useI18nState() {
-  const [lang, setLangState] = useState<Language>(detectDefaultLanguage)
-
-  useEffect(() => {
-    localStorage.setItem('convertinaja_lang', lang)
-  }, [lang])
-
-  const setLang = (newLang: Language) => {
-    setLangState(newLang)
-  }
-
-  return {
-    lang,
-    setLang,
-    t: translations[lang],
-  }
+export function useI18n() {
+  return useContext(I18nContext)
 }

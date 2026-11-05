@@ -11,7 +11,8 @@ interface ToolsCatalogProps {
 }
 
 export function ToolsCatalog({ onSelectToolTrigger, activeCategory, onCategoryChange }: ToolsCatalogProps) {
-  const { t } = useI18n()
+  const { lang, t } = useI18n()
+  const isEn = lang === 'en'
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'all'>('all')
 
   const currentTab = (activeCategory as CategoryType | 'all') || selectedCategory
@@ -80,7 +81,7 @@ export function ToolsCatalog({ onSelectToolTrigger, activeCategory, onCategoryCh
                 </span>
               </div>
               <p className="text-xs text-[#64748B] leading-relaxed mb-4">
-                {tool.description}
+                {isEn && tool.descriptionEn ? tool.descriptionEn : tool.description}
               </p>
             </div>
 

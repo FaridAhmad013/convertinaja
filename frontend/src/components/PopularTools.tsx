@@ -1,4 +1,4 @@
-import { FileText, Image as ImageIcon, Minimize2, Copy } from 'lucide-react'
+import { Sparkles, Image as ImageIcon, Minimize2, FileText } from 'lucide-react'
 import { useI18n } from '../i18n'
 
 interface PopularToolsProps {
@@ -10,20 +10,11 @@ export function PopularTools({ onSelectTool }: PopularToolsProps) {
 
   const tools = [
     {
-      id: 'pdf-to-jpg',
-      title: t.popular.pdfConverter,
-      description: t.popular.pdfConverterDesc,
-      accept: '.pdf,application/pdf',
-      icon: FileText,
-      iconColor: 'text-[#DC2626]',
-      iconBg: 'bg-red-50',
-    },
-    {
-      id: 'jpg-to-pdf',
-      title: t.popular.imageConverter,
-      description: t.popular.imageConverterDesc,
+      id: 'smart-optimize',
+      title: t.popular.smartOptimize,
+      description: t.popular.smartOptimizeDesc,
       accept: '.jpg,.jpeg,.png,.webp,image/*',
-      icon: ImageIcon,
+      icon: Sparkles,
       iconColor: 'text-[#2563EB]',
       iconBg: 'bg-blue-50',
     },
@@ -37,13 +28,22 @@ export function PopularTools({ onSelectTool }: PopularToolsProps) {
       iconBg: 'bg-blue-50',
     },
     {
-      id: 'merge-pdf',
-      title: t.popular.mergePdf,
-      description: t.popular.mergePdfDesc,
-      accept: '.pdf,application/pdf',
-      icon: Copy,
+      id: 'jpg-to-pdf',
+      title: t.popular.imageConverter,
+      description: t.popular.imageConverterDesc,
+      accept: '.jpg,.jpeg,.png,.webp,image/*',
+      icon: ImageIcon,
       iconColor: 'text-[#2563EB]',
       iconBg: 'bg-blue-50',
+    },
+    {
+      id: 'pdf-to-jpg',
+      title: t.popular.pdfConverter,
+      description: t.popular.pdfConverterDesc,
+      accept: '.pdf,application/pdf',
+      icon: FileText,
+      iconColor: 'text-[#DC2626]',
+      iconBg: 'bg-red-50',
     },
   ]
 
@@ -61,7 +61,7 @@ export function PopularTools({ onSelectTool }: PopularToolsProps) {
               key={item.id}
               type="button"
               onClick={() => onSelectTool(item.id, item.accept)}
-              className="w-full p-3.5 sm:p-4 rounded-xl border border-[#E2E8F0] bg-white hover:border-[#93C5FD] hover:bg-[#F8FAFC] transition-all text-left flex items-start gap-3.5 group cursor-pointer shadow-2xs"
+              className="w-full p-3.5 sm:p-4 rounded-xl border border-[#E2E8F0] bg-white hover:border-[#93C5FD] hover:bg-[#F8FAFC] transition-all text-left flex items-start gap-3.5 group cursor-pointer shadow-2xs hover:shadow-xs"
             >
               <div
                 className={`w-10 h-10 rounded-lg ${item.iconBg} ${item.iconColor} flex items-center justify-center shrink-0 mt-0.5`}
@@ -72,7 +72,7 @@ export function PopularTools({ onSelectTool }: PopularToolsProps) {
                 <span className="text-sm font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors block">
                   {item.title}
                 </span>
-                <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed line-clamp-1">
+                <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed line-clamp-2">
                   {item.description}
                 </p>
               </div>
