@@ -6,8 +6,8 @@
 
 ## 1. Project Phase
 
-- **Active Phase:** Foundation & Architecture Specification (Phase 0).
-- **Next Phase:** Phase 1 — PDF Tools Implementation (Backend HTTP + Poppler/Ghostscript engine + Frontend UI).
+- **Active Phase:** Phase 2 (Image Optimization & Tools Engine Implemented).
+- **Next Phase:** Phase 3 — Office Conversion (Headless LibreOffice).
 
 ---
 
@@ -22,7 +22,9 @@
 | **Conversion Engines** | Implemented (Phase 1) | `PopplerEngine` wrapper implemented for merge, split, compress (Ghostscript), PDF-to-image/txt/html, and extract images behind `Engine` interface. |
 | **Backend Endpoints** | Implemented | REST handlers for `POST /api/v1/conversions`, `GET /status`, `GET /download`, `DELETE /conversions/{id}` with CORS and Zerolog logging. All unit/handler tests passing. |
 | **Database & Queue** | In Progress | In-memory thread-safe adapter active; PostgreSQL migrations and Redis queue consumer ready for container deployment. |
-| **Infrastructure** | Implemented | `docker-compose.yml`, multi-stage Dockerfiles (`api`, `worker`, `frontend`), Nginx reverse proxy configuration with rate-limits, and helper scripts completed. Validated with `docker compose config`. |
+| **Image Tools Module** | Implemented | `backend/internal/conversion/image`: analyzer, optimizer (Balanced, Target Size candidate search), vips CLI encoder + Go stdlib fallback, REST endpoints (`/api/v1/image/optimize`, `analyze`, batch). Unit tests & benchmark passing. |
+| **Frontend Image Tools** | Implemented | InlineToolSelector dengan Target Size presets (100KB, 300KB, 500KB, 1MB, Custom), Resize presets (1920, 1600, 1280, 1080, Custom), Format (Auto, WebP, JPG, PNG, AVIF), Strategy, dan Before/After comparison card. Oxlint & build pass. |
+| **Infrastructure** | Implemented | Dockerfiles (`Dockerfile.api`, `Dockerfile.worker`) diperbarui memasang `libvips-tools`. Nginx reverse proxy configuration ready. |
 
 ---
 

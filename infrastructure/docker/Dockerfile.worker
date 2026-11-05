@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-dejavu \
     fonts-liberation \
     webp \
+    libvips-tools \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g 10001 appgroup && \

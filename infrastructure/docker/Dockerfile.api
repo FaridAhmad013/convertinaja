@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-dejavu \
     fonts-liberation \
     webp \
+    libvips-tools \
     curl \
     && rm -rf /var/lib/apt/lists/*
 

@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/faridahmad013/convertinaja/internal/config"
+	imageOpt "github.com/faridahmad013/convertinaja/internal/conversion/image"
 	"github.com/faridahmad013/convertinaja/internal/converter"
 	"github.com/faridahmad013/convertinaja/internal/handler"
 	"github.com/faridahmad013/convertinaja/internal/middleware"
@@ -35,6 +36,12 @@ func main() {
 	jobService := service.NewJobService(store, engine)
 	convHandler := handler.NewConversionHandler(store, jobService)
 
+	// Image Optimization Engine & Handler
+	vipsEncoder := imageOpt.NewVipsEncoder()
+	imageOptimizer := imageOpt.NewOptimizer(vipsEncoder)
+	imageService := imageOpt.NewService(store, imageOptimizer)
+	imageHandler := imageOpt.NewHandler(store, imageService)
+
 	router := chi.NewRouter()
 
 	router.Use(chiMiddleware.RequestID)
@@ -52,6 +59,7 @@ func main() {
 	})
 
 	convHandler.RegisterRoutes(router)
+	imageHandler.RegisterRoutes(router)
 
 	server := &http.Server{
 		Addr:         ":" + cfg.AppPort,
