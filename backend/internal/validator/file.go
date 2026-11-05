@@ -145,10 +145,11 @@ func ValidateFileHeader(r io.Reader, reportedSize int64, expectedAction string) 
 
 // SanitizeFilename prevents path traversal and returns safe base name
 func SanitizeFilename(rawName string) string {
-	base := filepath.Base(rawName)
+	// Normalize Windows backslashes so filepath.Base works consistently on Unix CI
+	clean := strings.ReplaceAll(rawName, "\\", "/")
+	base := filepath.Base(clean)
 	base = strings.ReplaceAll(base, "..", "")
 	base = strings.ReplaceAll(base, "/", "")
-	base = strings.ReplaceAll(base, "\\", "")
 	base = strings.TrimSpace(base)
 	if base == "" || base == "." {
 		return "unnamed_file"
