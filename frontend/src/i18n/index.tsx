@@ -553,30 +553,74 @@ export const translations: Record<Language, Translations> = {
 }
 
 function detectDefaultLanguage(): Language {
-  if (typeof window === 'undefined') return 'en'
-  const saved = localStorage.getItem('convertinaja_lang')
-  if (saved === 'id' || saved === 'en') return saved
-  const browserLang = (navigator.language || '').toLowerCase()
-  return browserLang.startsWith('id') ? 'id' : 'en'
+  if (typeof window !== 'undefined') {
+    const pathname = window.location.pathname
+    if (pathname === '/en' || pathname.startsWith('/en/')) {
+      return 'en'
+    }
+    if (pathname === '/id' || pathname.startsWith('/id/')) {
+      return 'id'
+    }
+    const saved = localStorage.getItem('convertinaja_lang')
+    if (saved === 'id' || saved === 'en') {
+      return saved
+    }
+    const browserLang = (navigator.language || '').toLowerCase()
+    if (browserLang.startsWith('id')) {
+      return 'id'
+    }
+  }
+  return 'id'
 }
 
 export interface I18nContextValue {
   lang: Language
+  isId: boolean
   setLanguage: (lang: Language) => void
   setLang: (lang: Language) => void
   t: Translations
 }
 
 export function useI18nState(): I18nContextValue {
-  const [lang, setLang] = useState<Language>(detectDefaultLanguage)
+  const [lang, setLangState] = useState<Language>(detectDefaultLanguage)
 
   useEffect(() => {
+    const currentPath = window.location.pathname
+    if (lang === 'en' && !currentPath.startsWith('/en')) {
+      const newPath = '/en' + (currentPath === '/' ? '' : currentPath)
+      window.history.replaceState({}, '', newPath + window.location.search + window.location.hash)
+    } else if (lang === 'id' && (currentPath.startsWith('/en') || currentPath.startsWith('/id'))) {
+      const newPath = currentPath.replace(/^\/(en|id)/, '') || '/'
+      window.history.replaceState({}, '', newPath + window.location.search + window.location.hash)
+    }
     localStorage.setItem('convertinaja_lang', lang)
     document.documentElement.lang = lang
+    document.title =
+      lang === 'en'
+        ? 'ConvertinAja - Fast, Free & Zero-Storage Document & Image Optimizer'
+        : 'ConvertinAja - Konversi & Optimasi Gambar/Dokumen Cepat, Gratis & Zero-Storage'
   }, [lang])
+
+  useEffect(() => {
+    function onPopState() {
+      const path = window.location.pathname
+      if (path === '/en' || path.startsWith('/en/')) {
+        setLangState('en')
+      } else if (path === '/id' || path.startsWith('/id/') || path === '/') {
+        setLangState('id')
+      }
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
+  function setLang(newLang: Language) {
+    setLangState(newLang)
+  }
 
   return {
     lang,
+    isId: lang === 'id',
     setLanguage: setLang,
     setLang,
     t: translations[lang],
@@ -584,10 +628,11 @@ export function useI18nState(): I18nContextValue {
 }
 
 export const I18nContext = createContext<I18nContextValue>({
-  lang: 'en',
+  lang: 'id',
+  isId: true,
   setLanguage: () => {},
   setLang: () => {},
-  t: translations.en,
+  t: translations.id,
 })
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {

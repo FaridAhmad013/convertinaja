@@ -19,6 +19,19 @@ import { validateUploadedFile } from './services/toolsCatalog'
 import { useConversion } from './hooks/useConversion'
 import { I18nContext, useI18nState } from './i18n'
 
+function detectLegalSlugFromUrl(): LegalPageSlug | null {
+  if (typeof window === 'undefined') return null
+  const path = window.location.pathname.replace(/^\/en/, '').replace(/\/$/, '')
+  if (path === '/privacy' || path === '/terms' || path === '/about' || path === '/contact') {
+    return path.slice(1) as LegalPageSlug
+  }
+  const hash = window.location.hash.replace(/^#/, '')
+  if (hash === 'privacy' || hash === 'terms' || hash === 'about' || hash === 'contact') {
+    return hash as LegalPageSlug
+  }
+  return null
+}
+
 export function App() {
   const i18n = useI18nState()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
@@ -27,7 +40,7 @@ export function App() {
   const [filePickerAccept, setFilePickerAccept] = useState<string | undefined>(undefined)
 
   // Legal View State (Dedicated Page View: privacy, terms, about, contact)
-  const [activeLegalPage, setActiveLegalPage] = useState<LegalPageSlug | null>(null)
+  const [activeLegalPage, setActiveLegalPage] = useState<LegalPageSlug | null>(detectLegalSlugFromUrl)
 
   const uploadSectionRef = useRef<HTMLDivElement>(null)
   const toolSelectorRef = useRef<HTMLDivElement>(null)
@@ -194,12 +207,27 @@ export function App() {
 
   const handleOpenLegal = (tab: LegalPageSlug) => {
     setActiveLegalPage(tab)
+    window.location.hash = tab
   }
 
   const handleBackFromLegal = () => {
     setActiveLegalPage(null)
+    if (window.location.hash) {
+      window.history.replaceState({}, '', window.location.pathname + window.location.search)
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  useEffect(() => {
+    function onHashChange() {
+      const slug = detectLegalSlugFromUrl()
+      if (slug) {
+        setActiveLegalPage(slug)
+      }
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
 
   return (
     <I18nContext.Provider value={i18n}>
