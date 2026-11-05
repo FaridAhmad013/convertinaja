@@ -1,0 +1,46 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace
+go.work
+
+# Dependencies
+vendor/
+
+# Node & Frontend
+node_modules/
+.npm
+frontend/dist/
+
+# OS and Editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment & Local Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Ephemeral runtime uploads & logs
+tmp/
+uploads/
+logs/
+*.log
